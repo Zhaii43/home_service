@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Link from "next/link"; // Import the Link component
+import Link from "next/link";
 import axios from "axios";
 
 export default function About() {
@@ -14,6 +14,11 @@ export default function About() {
   const headerAnimation = {
     hidden: { y: -100, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const cardAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
   useEffect(() => {
@@ -57,60 +62,55 @@ export default function About() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
+      {/* Header */}
       <motion.header
-        className="flex justify-between items-center px-8 py-4 bg-transparent shadow-md"
+        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
         initial="hidden"
         animate="visible"
         variants={headerAnimation}
       >
-        <h1 className="text-xl font-bold">Home Services</h1>
-        <nav className="flex gap-6 text-sm font-medium">
-          <Link href="/" className="hover:text-blue-600">
-            Home
-          </Link>
-          <Link href="/services" className="hover:text-blue-600">
-            Services
-          </Link>
-          <Link href="/about-us" className="hover:text-blue-600">
-            About Us
-          </Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
+        <nav className="flex gap-8 text-sm font-medium">
+          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
+          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
+          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
         </nav>
         <div>
           {isLoggedIn ? (
             <div className="relative">
               <button
                 onClick={toggleDropdown}
-                className="flex items-center gap-2 focus:outline-none"
+                className="flex items-center gap-3 focus:outline-none"
               >
-                <span className="font-semibold text-gray-700">
-                  Welcome, {username}!
+                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
+                  {username}
                 </span>
                 <Image
                   src="/images/user1.png"
                   alt="User Avatar"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full"
+                  width={40}
+                  height={40}
+                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
                 />
               </button>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
+                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
                   >
                     Profile
                   </Link>
                   <Link
                     href="/my-booking"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   >
                     My Booking
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
                   >
                     Logout
                   </button>
@@ -122,9 +122,9 @@ export default function About() {
               <Image
                 src="/images/user1.png"
                 alt="Login"
-                width={32}
-                height={32}
-                className="w-8 h-8 cursor-pointer hover:opacity-80"
+                width={40}
+                height={40}
+                className="rounded-full hover:opacity-80 transition-opacity duration-200"
               />
             </Link>
           )}
@@ -132,46 +132,84 @@ export default function About() {
       </motion.header>
 
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center flex-grow text-center p-8">
-        <h2 className="text-3xl font-bold mb-6 text-white">About Us</h2>
-        <p className="text-lg text-white mb-6 text-center max-w-3xl">
+      <main className="flex flex-col items-center justify-center flex-grow text-center px-4 sm:px-6 lg:px-8 py-16">
+        <motion.h2
+          className="text-4xl sm:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600 tracking-tight"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          About Us
+        </motion.h2>
+        <motion.p
+          className="text-lg sm:text-xl text-gray-300 mb-12 max-w-3xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+        >
           At Home Services, we are dedicated to providing top-notch home improvement and maintenance solutions tailored to your needs. Our skilled professionals ensure your home stays comfortable, functional, and beautiful.
-        </p>
-        <div className="flex flex-wrap justify-center gap-12 mb-12">
+        </motion.p>
+        <div className="flex flex-wrap justify-center gap-8 mb-16">
           {/* Mission */}
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Our Mission</h3>
-            <p className="text-gray-700">
+          <motion.div
+            className="bg-gray-800/50 border border-gray-700 p-6 rounded-xl shadow-lg max-w-sm text-center hover:shadow-[0_4px_20px_rgba(128,0,255,0.3)] transition-all duration-300"
+            variants={cardAnimation}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.3 }}
+          >
+            <h3 className="text-xl font-semibold mb-4 text-gray-100">Our Mission</h3>
+            <p className="text-gray-300">
               To deliver exceptional home services that enhance your living experience with professionalism, reliability, and care.
             </p>
-          </div>
+          </motion.div>
           {/* Vision */}
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Our Vision</h3>
-            <p className="text-gray-700">
+          <motion.div
+            className="bg-gray-800/50 border border-gray-700 p-6 rounded-xl shadow-lg max-w-sm text-center hover:shadow-[0_4px_20px_rgba(128,0,255,0.3)] transition-all duration-300"
+            variants={cardAnimation}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.4 }}
+          >
+            <h3 className="text-xl font-semibold mb-4 text-gray-100">Our Vision</h3>
+            <p className="text-gray-300">
               To be the most trusted and preferred home services provider in the industry.
             </p>
-          </div>
+          </motion.div>
           {/* Commitment */}
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Our Commitment</h3>
-            <p className="text-gray-700">
+          <motion.div
+            className="bg-gray-800/50 border border-gray-700 p-6 rounded-xl shadow-lg max-w-sm text-center hover:shadow-[0_4px_20px_rgba(128,0,255,0.3)] transition-all duration-300"
+            variants={cardAnimation}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.5 }}
+          >
+            <h3 className="text-xl font-semibold mb-4 text-gray-100">Our Commitment</h3>
+            <p className="text-gray-300">
               Your satisfaction is our priority. We strive to exceed expectations with every service we offer.
             </p>
-          </div>
+          </motion.div>
         </div>
-        <Image
-          src="/images/background.jpg" // Replace with the actual image path
-          alt="Our Team"
-          width={600}
-          height={400}
-          className="rounded-lg shadow-lg"
-        />
+        <motion.div
+          className="relative max-w-4xl w-full"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+        >
+          <Image
+            src="/images/background.jpg"
+            alt="Our Team"
+            width={800}
+            height={500}
+            className="rounded-xl shadow-lg border border-gray-700 w-full h-auto object-cover"
+          />
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/20 to-transparent"></div>
+        </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-translucent text-center py-4">
-        <p className="text-sm text-gray-600">
+      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
+        <p className="text-sm text-gray-400">
           © {new Date().getFullYear()} Home Services. All rights reserved.
         </p>
       </footer>

@@ -36,6 +36,16 @@ function EditProfileContent() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
+  const headerAnimation = {
+    hidden: { y: -100, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const cardAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
   const fetchUserDetails = useCallback(async (token: string) => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
@@ -44,7 +54,6 @@ function EditProfileContent() {
       console.log("User details response:", response.data);
       setUser(response.data);
       setIsLoggedIn(true);
-      // Pre-fill form with current user data
       setFormData({
         first_name: response.data.first_name || "",
         middle_name: response.data.middle_name || "",
@@ -119,7 +128,7 @@ function EditProfileContent() {
       );
       setUser(response.data);
       setFormSuccess("Profile updated successfully!");
-      setTimeout(() => router.push("/profile"), 1000); 
+      setTimeout(() => router.push("/profile"), 1000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Failed to update profile:", {
@@ -149,61 +158,60 @@ function EditProfileContent() {
   }
 
   if (!user) {
-    return <div className="flex items-center justify-center min-h-screen text-gray-500">Loading profile...</div>;
+    return <div className="flex items-center justify-center min-h-screen text-gray-400">Loading profile...</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
       {/* Header */}
       <motion.header
-        className="flex justify-between items-center px-8 py-4 bg-transparent shadow-md"
+        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
         initial="hidden"
         animate="visible"
         exit="hidden"
-        variants={{
-          hidden: { y: -100, opacity: 0 },
-          visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-        }}
+        variants={headerAnimation}
       >
-        <h1 className="text-xl font-bold text-white">Home Services</h1>
-        <nav className="flex gap-6 text-sm font-medium">
-          <Link href="/" className="hover:text-purple-600 text-white">Home</Link>
-          <Link href="/services" className="hover:text-purple-600 text-white">Services</Link>
-          <Link href="/about-us" className="hover:text-purple-600 text-white">About Us</Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
+        <nav className="flex gap-8 text-sm font-medium">
+          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
+          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
+          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
         </nav>
         <div>
           {isLoggedIn ? (
             <div className="relative">
               <div
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
-                <span className="font-semibold text-white">Welcome, {user.username}!</span>
+                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
+                  {user.username}
+                </span>
                 <Image
                   src="/images/user1.png"
                   alt="User"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 cursor-pointer hover:opacity-80 rounded-full"
+                  width={40}
+                  height={40}
+                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
                 />
               </div>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-48">
+                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
                   >
                     Profile
                   </Link>
                   <Link
                     href="/my-booking"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   >
                     My Booking
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
                   >
                     Logout
                   </button>
@@ -215,9 +223,9 @@ function EditProfileContent() {
               <Image
                 src="/images/user1.png"
                 alt="Login"
-                width={32}
-                height={32}
-                className="w-8 h-8 cursor-pointer hover:opacity-80"
+                width={40}
+                height={40}
+                className="rounded-full hover:opacity-80 transition-opacity duration-200"
               />
             </Link>
           )}
@@ -225,12 +233,37 @@ function EditProfileContent() {
       </motion.header>
 
       {/* Edit Profile Content */}
-      <main className="flex flex-col items-center py-12 px-6">
-        <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-8 text-white">
-          <h2 className="text-3xl font-bold text-center mb-6">Edit Profile</h2>
-          {formError && <div className="text-red-500 text-center mb-4">{formError}</div>}
-          {formSuccess && <div className="text-green-500 text-center mb-4">{formSuccess}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <main className="flex flex-col items-center py-16 px-4 sm:px-6 lg:px-8">
+        <motion.div
+          className="w-full max-w-2xl bg-gray-800/50 border border-gray-700 rounded-2xl shadow-2xl p-8"
+          variants={cardAnimation}
+          initial="hidden"
+          animate="visible"
+        >
+          <h2 className="text-4xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600 tracking-tight">
+            Edit Profile
+          </h2>
+          {formError && (
+            <motion.div
+              className="text-red-400 text-center mb-4 bg-red-900/20 border border-red-700 rounded-lg py-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {formError}
+            </motion.div>
+          )}
+          {formSuccess && (
+            <motion.div
+              className="text-green-400 text-center mb-4 bg-green-900/20 border border-green-700 rounded-lg py-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {formSuccess}
+            </motion.div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300" htmlFor="first_name">
                 First Name
@@ -241,7 +274,7 @@ function EditProfileContent() {
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter first name"
               />
             </div>
@@ -255,7 +288,7 @@ function EditProfileContent() {
                 name="middle_name"
                 value={formData.middle_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter middle name (optional)"
               />
             </div>
@@ -269,7 +302,7 @@ function EditProfileContent() {
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter last name"
               />
             </div>
@@ -283,7 +316,7 @@ function EditProfileContent() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter email"
                 required
               />
@@ -298,7 +331,7 @@ function EditProfileContent() {
                 name="contact"
                 value={formData.contact}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter contact number"
               />
             </div>
@@ -312,7 +345,7 @@ function EditProfileContent() {
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
                 placeholder="Enter address"
               />
             </div>
@@ -325,7 +358,7 @@ function EditProfileContent() {
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
               >
                 <option value="">Select gender</option>
                 <option value="Male">Male</option>
@@ -336,24 +369,24 @@ function EditProfileContent() {
             <div className="flex justify-center gap-4">
               <button
                 type="submit"
-                className="px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition duration-300"
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-full shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 transform transition-all duration-300"
               >
                 Save Changes
               </button>
               <Link
                 href="/profile"
-                className="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg shadow-lg hover:bg-gray-700 transition duration-300"
+                className="px-8 py-3 bg-gray-600/50 border border-gray-700 text-gray-200 font-semibold rounded-full shadow-lg hover:bg-gray-700 hover:scale-105 transform transition-all duration-300"
               >
                 Cancel
               </Link>
             </div>
           </form>
-        </div>
+        </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-translucent text-center py-4">
-        <p className="text-sm text-gray-600">
+      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
+        <p className="text-sm text-gray-400">
           © {new Date().getFullYear()} Home Services. All rights reserved.
         </p>
       </footer>
@@ -363,7 +396,7 @@ function EditProfileContent() {
 
 export default function EditProfile() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500">Loading profile...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-400">Loading profile...</div>}>
       <EditProfileContent />
     </Suspense>
   );

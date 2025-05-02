@@ -30,7 +30,7 @@ function ProfileContent() {
       const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("User details response:", response.data); // Debug log
+      console.log("User details response:", response.data);
       setUser(response.data);
       setIsLoggedIn(true);
     } catch (error) {
@@ -86,14 +86,14 @@ function ProfileContent() {
   }
 
   if (!user) {
-    return <div className="flex items-center justify-center min-h-screen text-gray-500">Loading profile...</div>;
+    return <div className="flex items-center justify-center min-h-screen text-gray-400">Loading profile...</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
       {/* Header */}
       <motion.header
-        className="flex justify-between items-center px-8 py-4 bg-transparent shadow-md"
+        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
         initial="hidden"
         animate="visible"
         exit="hidden"
@@ -102,45 +102,47 @@ function ProfileContent() {
           visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
         }}
       >
-        <h1 className="text-xl font-bold text-white">Home Services</h1>
-        <nav className="flex gap-6 text-sm font-medium">
-          <Link href="/" className="hover:text-purple-600 text-white">Home</Link>
-          <Link href="/services" className="hover:text-purple-600 text-white">Services</Link>
-          <Link href="/about-us" className="hover:text-purple-600 text-white">About Us</Link>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
+        <nav className="flex gap-8 text-sm font-medium">
+          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
+          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
+          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
         </nav>
         <div>
           {isLoggedIn ? (
             <div className="relative">
               <div
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
-                <span className="font-semibold text-white">Welcome, {user.username}!</span>
+                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
+                  {user.username}
+                </span>
                 <Image
                   src="/images/user1.png"
                   alt="User"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 cursor-pointer hover:opacity-80 rounded-full"
+                  width={40}
+                  height={40}
+                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
                 />
               </div>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded-md shadow-lg w-48">
+                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
                   >
                     Profile
                   </Link>
                   <Link
                     href="/my-booking"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   >
                     My Booking
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
                   >
                     Logout
                   </button>
@@ -152,9 +154,9 @@ function ProfileContent() {
               <Image
                 src="/images/user1.png"
                 alt="Login"
-                width={32}
-                height={32}
-                className="w-8 h-8 cursor-pointer hover:opacity-80"
+                width={40}
+                height={40}
+                className="rounded-full hover:opacity-80 transition-opacity duration-200"
               />
             </Link>
           )}
@@ -162,62 +164,72 @@ function ProfileContent() {
       </motion.header>
 
       {/* Profile Content */}
-      <main className="flex flex-col items-center py-12 px-6">
-        <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-lg p-8 text-white">
-          <h2 className="text-3xl font-bold text-center mb-6">User Profile</h2>
-          <div className="flex flex-col items-center mb-6">
-            <Image
-              src="/images/user1.png"
-              alt="Profile"
-              width={120}
-              height={120}
-              className="rounded-full mb-4"
-            />
-            <h3 className="text-xl font-semibold">
+      <main className="flex flex-col items-center py-16 px-4 sm:px-6 lg:px-8 flex-grow">
+        <motion.div
+          className="w-full max-w-3xl bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 sm:p-10 text-white"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <h2 className="text-4xl font-bold text-center mb-8 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">
+            Your Profile
+          </h2>
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative">
+              <Image
+                src="/images/user1.png"
+                alt="Profile"
+                width={128}
+                height={128}
+                className="rounded-full border-4 border-purple-500/50 shadow-lg"
+              />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-transparent"></div>
+            </div>
+            <h3 className="text-2xl font-semibold mt-4 tracking-wide">
               {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
             </h3>
-            <p className="text-gray-400">@{user.username}</p>
+            <p className="text-gray-400 text-sm mt-1">@{user.username}</p>
           </div>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300">Full Name</label>
-              <p className="text-lg">
+              <label className="block text-sm font-medium text-gray-300 tracking-wide">Full Name</label>
+              <p className="text-lg text-gray-100 mt-1">
                 {user.first_name && user.last_name
                   ? `${user.first_name} ${user.middle_name || ''} ${user.last_name}`.trim()
                   : "Not provided"}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Email</label>
-              <p className="text-lg">{user.email}</p>
+              <label className="block text-sm font-medium text-gray-300 tracking-wide">Email</label>
+              <p className="text-lg text-gray-100 mt-1">{user.email}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Contact</label>
-              <p className="text-lg">{user.contact || "Not provided"}</p>
+              <label className="block text-sm font-medium text-gray-300 tracking-wide">Contact</label>
+              <p className="text-lg text-gray-100 mt-1">{user.contact || "Not provided"}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Address</label>
-              <p className="text-lg">{user.address || "Not provided"}</p>
+              <label className="block text-sm font-medium text-gray-300 tracking-wide">Address</label>
+              <p className="text-lg text-gray-100 mt-1">{user.address || "Not provided"}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Gender</label>
-              <p className="text-lg">{user.gender || "Not provided"}</p>
+              <label className="block text-sm font-medium text-gray-300 tracking-wide">Gender</label>
+              <p className="text-lg text-gray-100 mt-1">{user.gender || "Not provided"}</p>
             </div>
           </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <Link
               href="/edit-profile"
-              className="px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition duration-300"
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-full shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 transform transition-all duration-300"
             >
               Edit Profile
             </Link>
           </div>
-        </div>
+        </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-translucent text-center py-4">
-        <p className="ext-sm text-gray-600">
+      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
+        <p className="text-sm text-gray-400">
           © {new Date().getFullYear()} Home Services. All rights reserved.
         </p>
       </footer>
@@ -227,7 +239,7 @@ function ProfileContent() {
 
 export default function Profile() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-500">Loading profile...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-400">Loading profile...</div>}>
       <ProfileContent />
     </Suspense>
   );
