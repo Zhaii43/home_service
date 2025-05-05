@@ -3,9 +3,9 @@
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Header from "@/component/header";
 
 interface UserType {
   first_name?: string;
@@ -18,11 +18,22 @@ interface UserType {
   email: string;
 }
 
+interface UpdateUserPayload {
+  first_name: string;
+  middle_name: string;
+  last_name: string;
+  contact: string;
+  address: string;
+  gender: string;
+  email: string;
+  current_password?: string;
+  password?: string;
+  confirm_password?: string;
+}
+
 function EditProfileContent() {
   const router = useRouter();
   const [user, setUser] = useState<UserType | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     first_name: "",
@@ -32,14 +43,12 @@ function EditProfileContent() {
     address: "",
     gender: "",
     email: "",
+    current_password: "",
+    password: "",
+    confirm_password: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
-
-  const headerAnimation = {
-    hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-  };
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -53,7 +62,6 @@ function EditProfileContent() {
       });
       console.log("User details response:", response.data);
       setUser(response.data);
-      setIsLoggedIn(true);
       setFormData({
         first_name: response.data.first_name || "",
         middle_name: response.data.middle_name || "",
@@ -62,6 +70,9 @@ function EditProfileContent() {
         address: response.data.address || "",
         gender: response.data.gender || "",
         email: response.data.email || "",
+        current_password: "",
+        password: "",
+        confirm_password: "",
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -74,7 +85,9 @@ function EditProfileContent() {
         if (error.response?.status === 401) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-          router.push("/login");
+         
+
+ router.push("/login");
         }
       } else {
         console.error("Unexpected error fetching user details:", error);
@@ -82,25 +95,6 @@ function EditProfileContent() {
       }
     }
   }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await axios.post("http://127.0.0.1:8000/api/user/logout", {
-          refresh_token: refreshToken,
-        });
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      setIsLoggedIn(false);
-      setUser(null);
-      router.push("/login");
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -112,6 +106,18 @@ function EditProfileContent() {
     setFormError(null);
     setFormSuccess(null);
 
+    // Client-side validation for passwords
+    if (formData.password || formData.confirm_password || formData.current_password) {
+      if (!formData.current_password) {
+        setFormError("Current password is required to update password.");
+        return;
+      }
+      if (formData.password !== formData.confirm_password) {
+        setFormError("New password and confirm password do not match.");
+        return;
+      }
+    }
+
     try {
       const token = localStorage.getItem("access_token");
       if (!token) {
@@ -119,15 +125,37 @@ function EditProfileContent() {
         return;
       }
 
+      // Prepare payload, only include password fields if they are filled
+      const payload: UpdateUserPayload = {
+        first_name: formData.first_name,
+        middle_name: formData.middle_name,
+        last_name: formData.last_name,
+        contact: formData.contact,
+        address: formData.address,
+        gender: formData.gender,
+        email: formData.email,
+      };
+      if (formData.current_password && formData.password && formData.confirm_password) {
+        payload.current_password = formData.current_password;
+        payload.password = formData.password;
+        payload.confirm_password = formData.confirm_password;
+      }
+
       const response = await axios.put(
         "http://127.0.0.1:8000/api/user/update/",
-        formData,
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setUser(response.data);
       setFormSuccess("Profile updated successfully!");
+      setFormData((prev) => ({
+        ...prev,
+        current_password: "",
+        password: "",
+        confirm_password: "",
+      }));
       setTimeout(() => router.push("/profile"), 1000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -163,74 +191,7 @@ function EditProfileContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
-      {/* Header */}
-      <motion.header
-        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={headerAnimation}
-      >
-        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
-        <nav className="flex gap-8 text-sm font-medium">
-          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
-          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
-          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
-        </nav>
-        <div>
-          {isLoggedIn ? (
-            <div className="relative">
-              <div
-                className="flex items-center gap-3 cursor-pointer"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
-                  {user.username}
-                </span>
-                <Image
-                  src="/images/user1.png"
-                  alt="User"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
-                />
-              </div>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/my-booking"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  >
-                    My Booking
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/login">
-              <Image
-                src="/images/user1.png"
-                alt="Login"
-                width={40}
-                height={40}
-                className="rounded-full hover:opacity-80 transition-opacity duration-200"
-              />
-            </Link>
-          )}
-        </div>
-      </motion.header>
+      <Header />
 
       {/* Edit Profile Content */}
       <main className="flex flex-col items-center py-16 px-4 sm:px-6 lg:px-8">
@@ -366,16 +327,58 @@ function EditProfileContent() {
                 <option value="Other">Other</option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300" htmlFor="current_password">
+                Current Password
+              </label>
+              <input
+                type="password"
+                id="current_password"
+                name="current_password"
+                value={formData.current_password}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                placeholder="Enter current password (optional)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300" htmlFor="password">
+                New Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                placeholder="Enter new password (optional)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300" htmlFor="confirm_password">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                value={formData.confirm_password}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                placeholder="Confirm new password (optional)"
+              />
+            </div>
             <div className="flex justify-center gap-4">
               <button
                 type="submit"
-                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-full shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 transform transition-all duration-300"
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-full shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 transform transition-all duration-200"
               >
                 Save Changes
               </button>
               <Link
                 href="/profile"
-                className="px-8 py-3 bg-gray-600/50 border border-gray-700 text-gray-200 font-semibold rounded-full shadow-lg hover:bg-gray-700 hover:scale-105 transform transition-all duration-300"
+                className="px-8 py-3 bg-gray-600/50 border border-gray-700 text-gray-200 font-semibold rounded-full shadow-lg hover:bg-gray-700 hover:scale-105 transform transition-all duration-200"
               >
                 Cancel
               </Link>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Header from "@/component/header";
 
 interface UserType {
   first_name?: string;
@@ -21,8 +22,6 @@ interface UserType {
 function ProfileContent() {
   const router = useRouter();
   const [user, setUser] = useState<UserType | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUserDetails = useCallback(async (token: string) => {
@@ -32,7 +31,6 @@ function ProfileContent() {
       });
       console.log("User details response:", response.data);
       setUser(response.data);
-      setIsLoggedIn(true);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Failed to fetch user details:", {
@@ -53,25 +51,6 @@ function ProfileContent() {
     }
   }, [router]);
 
-  const handleLogout = async () => {
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await axios.post("http://127.0.0.1:8000/api/user/logout", {
-          refresh_token: refreshToken,
-        });
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      setIsLoggedIn(false);
-      setUser(null);
-      router.push("/login");
-    }
-  };
-
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) {
@@ -91,78 +70,7 @@ function ProfileContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
-      {/* Header */}
-      <motion.header
-        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={{
-          hidden: { y: -100, opacity: 0 },
-          visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-        }}
-      >
-        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
-        <nav className="flex gap-8 text-sm font-medium">
-          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
-          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
-          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
-        </nav>
-        <div>
-          {isLoggedIn ? (
-            <div className="relative">
-              <div
-                className="flex items-center gap-3 cursor-pointer"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
-                  {user.username}
-                </span>
-                <Image
-                  src="/images/user1.png"
-                  alt="User"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
-                />
-              </div>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/my-booking"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  >
-                    My Booking
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/login">
-              <Image
-                src="/images/user1.png"
-                alt="Login"
-                width={40}
-                height={40}
-                className="rounded-full hover:opacity-80 transition-opacity duration-200"
-              />
-            </Link>
-          )}
-        </div>
-      </motion.header>
-
+      <Header />
       {/* Profile Content */}
       <main className="flex flex-col items-center py-16 px-4 sm:px-6 lg:px-8 flex-grow">
         <motion.div

@@ -2,10 +2,10 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Header from "@/component/header";
 
 interface ImageType {
   id: number;
@@ -21,7 +21,6 @@ interface ServiceType {
   images: ImageType[];
 }
 
-// Client-side component that uses useSearchParams and useRouter
 function ServicesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -29,14 +28,6 @@ function ServicesContent() {
 
   const [services, setServices] = useState<ServiceType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const headerAnimation = {
-    hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-  };
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -44,51 +35,8 @@ function ServicesContent() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      setIsLoggedIn(true);
-      fetchUserDetails(token);
-    }
     fetchServices();
   }, [category]);
-
-  const fetchUserDetails = async (token: string) => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsername(response.data.username);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Failed to fetch user details:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message,
-        });
-      } else {
-        console.error("Unexpected error fetching user details:", error);
-      }
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await axios.post("http://127.0.0.1:8000/api/user/logout", {
-          refresh_token: refreshToken,
-        });
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      setIsLoggedIn(false);
-      setUsername(null);
-      window.location.href = "/login";
-    }
-  };
 
   const fetchServices = async () => {
     try {
@@ -115,8 +63,6 @@ function ServicesContent() {
     router.push(`/services?category=${selectedCategory}`);
   };
 
-  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
-
   const filteredServices = services
     .filter((service) => category === "all" || service.category === category)
     .filter((service) =>
@@ -125,75 +71,7 @@ function ServicesContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
-      {/* Header */}
-      <motion.header
-        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={headerAnimation}
-      >
-        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
-        <nav className="flex gap-8 text-sm font-medium">
-          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
-          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
-          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
-        </nav>
-        <div>
-          {isLoggedIn ? (
-            <div className="relative">
-              <button
-                onClick={toggleDropdown}
-                className="flex items-center gap-3 focus:outline-none"
-              >
-                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
-                  {username}
-                </span>
-                <Image
-                  src="/images/user1.png"
-                  alt="User Avatar"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
-                />
-              </button>
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/my-booking"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  >
-                    My Booking
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/login">
-              <Image
-                src="/images/user1.png"
-                alt="Login"
-                width={40}
-                height={40}
-                className="rounded-full hover:opacity-80 transition-opacity duration-200"
-              />
-            </Link>
-          )}
-        </div>
-      </motion.header>
-
+      <Header />
       {/* Main Content */}
       <main className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-10 px-4 sm:px-6 lg:px-8 py-16">
         {/* Categories */}
@@ -322,7 +200,6 @@ function ServicesContent() {
   );
 }
 
-// Main page component
 export default function Services() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-gray-400">Loading services...</div>}>

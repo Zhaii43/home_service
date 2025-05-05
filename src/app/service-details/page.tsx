@@ -4,8 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback, Suspense } from "react";
 import axios from "axios";
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
+import Header from "@/component/header";
 
 interface ImageType {
   id: number;
@@ -27,40 +27,27 @@ function ServiceDetailsContent() {
 
   const [service, setService] = useState<ServiceType | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const headerAnimation = {
-    hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-  };
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  const fetchUserDetails = useCallback(async (token: string) => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsername(response.data.username);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Failed to fetch user details:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message,
-        });
-      } else {
-        console.error("Unexpected error fetching user details:", error);
-      }
-    }
-  }, []);
+  const modalAnimation = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
+  };
 
   const fetchServiceDetails = useCallback(async () => {
-    if (!serviceId) return;
+    if (!serviceId) {
+      console.error("No serviceId provided in URL");
+      return;
+    }
     try {
       const response = await axios.get(
         `http://127.0.0.1:8000/api/services/${serviceId}`
@@ -79,22 +66,82 @@ function ServiceDetailsContent() {
     }
   }, [serviceId]);
 
-  const handleLogout = async () => {
+  const handleBookingSubmit = async () => {
+    setBookingError(null); // Clear previous errors
+
+    if (!isLoggedIn) {
+      setBookingError("Please log in to make a booking.");
+      return;
+    }
+
+    if (!serviceId) {
+      setBookingError("Invalid service ID.");
+      console.error("Booking failed: serviceId is missing");
+      return;
+    }
+
+    if (!selectedDate || !selectedTime) {
+      setBookingError("Please select both date and time.");
+      return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setBookingError("Authentication token is missing. Please log in again.");
+      console.error("Booking failed: No access token found");
+      return;
+    }
+
     try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await axios.post("http://127.0.0.1:8000/api/user/logout", {
-          refresh_token: refreshToken,
-        });
-      }
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/bookings/",
+        {
+          service: parseInt(serviceId, 10),
+          booking_date: selectedDate,
+          booking_time: selectedTime,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Booking created successfully:", response.data);
+      setBookingSuccess(true);
+      setBookingError(null);
+      setTimeout(() => {
+        setIsBookingModalOpen(false);
+        setBookingSuccess(false);
+        setSelectedDate("");
+        setSelectedTime("");
+      }, 2000);
     } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      setIsLoggedIn(false);
-      setUsername(null);
-      window.location.href = "/login";
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data;
+        console.error("Booking error details:", {
+          status: error.response?.status,
+          data: errorData,
+          message: error.message,
+        });
+        if (error.response?.status === 401) {
+          setBookingError("Session expired. Please log in again.");
+        } else if (errorData?.non_field_errors?.includes(
+          "The fields service, booking_date, booking_time must make a unique set."
+        )) {
+          setBookingError(
+            `This time slot (${selectedTime} on ${selectedDate}) is already booked for this service. Please choose a different time or date.`
+          );
+        } else if (errorData?.detail) {
+          setBookingError(errorData.detail);
+        } else if (errorData?.non_field_errors) {
+          setBookingError(errorData.non_field_errors.join(" "));
+        } else if (errorData?.service || errorData?.booking_date || errorData?.booking_time) {
+          setBookingError("Invalid booking details. Please check your inputs.");
+        } else {
+          setBookingError("Failed to create booking. Please try again.");
+        }
+      } else {
+        console.error("Unexpected booking error:", error);
+        setBookingError("An unexpected error occurred.");
+      }
     }
   };
 
@@ -102,12 +149,11 @@ function ServiceDetailsContent() {
     const token = localStorage.getItem("access_token");
     if (token) {
       setIsLoggedIn(true);
-      fetchUserDetails(token);
     }
     if (serviceId) {
       fetchServiceDetails();
     }
-  }, [serviceId, fetchUserDetails, fetchServiceDetails]);
+  }, [serviceId, fetchServiceDetails]);
 
   if (!service) {
     return <div className="flex items-center justify-center min-h-screen text-gray-400">Loading...</div>;
@@ -115,75 +161,7 @@ function ServiceDetailsContent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
-      {/* Header */}
-      <motion.header
-        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={headerAnimation}
-      >
-        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
-        <nav className="flex gap-8 text-sm font-medium">
-          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
-          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
-          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
-        </nav>
-        <div>
-          {isLoggedIn ? (
-            <div className="relative">
-              <div
-                className="flex items-center gap-3 cursor-pointer"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <span className="font-semibold text-gray-200 hover:text-white transition-colors duration-200">
-                  {username}
-                </span>
-                <Image
-                  src="/images/user1.png"
-                  alt="User"
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-purple-500 p-0.5 hover:opacity-90 transition-opacity duration-200"
-                />
-              </div>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-56 z-10">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-t-lg"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/my-booking"
-                    className="block px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  >
-                    My Booking
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-3 text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200 rounded-b-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link href="/login">
-              <Image
-                src="/images/user1.png"
-                alt="Login"
-                width={40}
-                height={40}
-                className="rounded-full hover:opacity-80 transition-opacity duration-200"
-              />
-            </Link>
-          )}
-        </div>
-      </motion.header>
-
+      <Header />
       {/* Service Details */}
       <main className="flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16">
         {/* Hero Section */}
@@ -222,12 +200,93 @@ function ServiceDetailsContent() {
               <span className="ml-2 text-purple-400">{service.location}</span>
             </p>
             <button
+              onClick={() => {
+                setIsBookingModalOpen(true);
+                setBookingError(null); // Reset error when opening modal
+              }}
               className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-full shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 transform transition-all duration-300"
             >
               Book Now
             </button>
           </div>
         </motion.div>
+
+        {/* Booking Modal */}
+        {isBookingModalOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={modalAnimation}
+          >
+            <div className="bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+              <h2 className="text-2xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">
+                Book Your Appointment
+              </h2>
+              {bookingSuccess ? (
+                <p className="text-green-400 text-center">
+                  Booking confirmed for {selectedDate} at {selectedTime}!
+                </p>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-gray-300 mb-2 font-semibold">
+                      Select Date
+                    </label>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-gray-300 mb-2 font-semibold">
+                      Select Time
+                    </label>
+                    <select
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="">Select a time</option>
+                      {["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"].map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {bookingError && (
+                    <p className="text-red-400 mb-4">{bookingError}</p>
+                  )}
+                  <p className="text-gray-400 mb-6 text-sm">
+                    Note: Once confirmed, this booking cannot be changed or canceled.
+                  </p>
+                  <div className="flex justify-end gap-4">
+                    <button
+                      onClick={() => {
+                        setIsBookingModalOpen(false);
+                        setBookingError(null); // Reset error when closing modal
+                      }}
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleBookingSubmit}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200"
+                    >
+                      Confirm Booking
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Image Gallery */}
         <motion.div

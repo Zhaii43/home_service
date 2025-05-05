@@ -5,7 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
+import Header from "@/component/header";
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -26,11 +26,6 @@ const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-
-  const headerAnimation = {
-    hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
-  };
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -70,33 +65,7 @@ const SignupPage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
-      {/* Header */}
-      <motion.header
-        className="flex justify-between items-center px-6 py-4 bg-gray-900/80 backdrop-blur-md shadow-lg"
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        variants={headerAnimation}
-      >
-        <h1 className="text-2xl font-bold text-white tracking-tight">Home Services</h1>
-        <nav className="flex gap-8 text-sm font-medium">
-          <Link href="/" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Home</Link>
-          <Link href="/services" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">Services</Link>
-          <Link href="/about-us" className="text-gray-200 hover:text-purple-400 transition-colors duration-200">About Us</Link>
-        </nav>
-        <div>
-          <Link href="/login">
-            <Image
-              src="/images/user1.png"
-              alt="Login/Signup"
-              width={40}
-              height={40}
-              className="rounded-full hover:opacity-80 transition-opacity duration-200"
-            />
-          </Link>
-        </div>
-      </motion.header>
-
+      <Header />
       {/* Main Content */}
       <main className="flex flex-col items-center justify-center flex-grow px-4 sm:px-6 lg:px-8 py-16">
         <motion.div
