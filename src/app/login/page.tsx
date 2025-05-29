@@ -7,18 +7,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Header from "@/component/header";
+import Footer from "@/component/footer";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -97,7 +106,7 @@ const LoginPage: React.FC = () => {
                   placeholder="Enter your email"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-300"
@@ -105,14 +114,21 @@ const LoginPage: React.FC = () => {
                   Password
                 </label>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="mt-1 block w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="mt-1 block w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 pr-10"
                   placeholder="Enter your password"
                 />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
               {errorMessage && (
                 <motion.div
@@ -142,12 +158,7 @@ const LoginPage: React.FC = () => {
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Home Services. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 };

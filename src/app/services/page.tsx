@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Header from "@/component/header";
+import Footer from "@/component/footer";
 
 interface ImageType {
   id: number;
@@ -190,12 +191,7 @@ function ServicesContent() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Home Services. All rights reserved.
-        </p>
-      </footer>
+    <Footer />
     </div>
   );
 }

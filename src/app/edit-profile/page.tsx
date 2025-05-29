@@ -6,6 +6,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Header from "@/component/header";
+import Footer from "@/component/footer";
+import { Eye, EyeOff } from "lucide-react";
 
 interface UserType {
   first_name?: string;
@@ -49,6 +51,11 @@ function EditProfileContent() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [showPasswords, setShowPasswords] = useState({
+    current_password: false,
+    password: false,
+    confirm_password: false,
+  });
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -85,9 +92,7 @@ function EditProfileContent() {
         if (error.response?.status === 401) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-         
-
- router.push("/login");
+          router.push("/login");
         }
       } else {
         console.error("Unexpected error fetching user details:", error);
@@ -99,6 +104,10 @@ function EditProfileContent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,6 +125,13 @@ function EditProfileContent() {
         setFormError("New password and confirm password do not match.");
         return;
       }
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        setFormError(
+          "New password must be at least 8 characters long, contain at least one uppercase letter, and one special character (!@#$%^&*)."
+        );
+        return;
+      }
     }
 
     try {
@@ -125,7 +141,6 @@ function EditProfileContent() {
         return;
       }
 
-      // Prepare payload, only include password fields if they are filled
       const payload: UpdateUserPayload = {
         first_name: formData.first_name,
         middle_name: formData.middle_name,
@@ -156,15 +171,25 @@ function EditProfileContent() {
         password: "",
         confirm_password: "",
       }));
+      setShowPasswords({
+        current_password: false,
+        password: false,
+        confirm_password: false,
+      });
       setTimeout(() => router.push("/profile"), 1000);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (axios.isAxiosError(error) && error.response?.data) {
         console.error("Failed to update profile:", {
           status: error.response?.status,
           data: error.response?.data,
           message: error.message,
         });
-        setFormError(error.response?.data?.error || "Failed to update profile. Please try again.");
+        // Check for specific current_password error
+        if (error.response.data.current_password) {
+          setFormError(error.response.data.current_password);
+        } else {
+          setFormError(error.response.data.error || "Failed to update profile. Please try again.");
+        }
       } else {
         console.error("Unexpected error updating profile:", error);
         setFormError("An unexpected error occurred.");
@@ -327,47 +352,68 @@ function EditProfileContent() {
                 <option value="Other">Other</option>
               </select>
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-300" htmlFor="current_password">
                 Current Password
               </label>
               <input
-                type="password"
+                type={showPasswords.current_password ? "text" : "password"}
                 id="current_password"
                 name="current_password"
                 value={formData.current_password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 pr-10"
                 placeholder="Enter current password (optional)"
               />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("current_password")}
+                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
+              >
+                {showPasswords.current_password ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-300" htmlFor="password">
                 New Password
               </label>
               <input
-                type="password"
+                type={showPasswords.password ? "text" : "password"}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 pr-10"
                 placeholder="Enter new password (optional)"
               />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("password")}
+                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
+              >
+                {showPasswords.password ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-300" htmlFor="confirm_password">
                 Confirm New Password
               </label>
               <input
-                type="password"
+                type={showPasswords.confirm_password ? "text" : "password"}
                 id="confirm_password"
                 name="confirm_password"
                 value={formData.confirm_password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 pr-10"
                 placeholder="Confirm new password (optional)"
               />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("confirm_password")}
+                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
+              >
+                {showPasswords.confirm_password ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             <div className="flex justify-center gap-4">
               <button
@@ -387,12 +433,7 @@ function EditProfileContent() {
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Home Services. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

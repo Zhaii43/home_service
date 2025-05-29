@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Header from "@/component/header";
+import Footer from "@/component/footer";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +26,11 @@ const SignupPage: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  // New state for password visibility
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirm_password: false,
+  });
 
   const router = useRouter();
 
@@ -40,6 +47,11 @@ const SignupPage: React.FC = () => {
     setErrors({});
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -49,6 +61,10 @@ const SignupPage: React.FC = () => {
     try {
       await axios.post("http://127.0.0.1:8000/api/user/register/", formData);
       setSuccessMessage("Account created successfully! Redirecting...");
+      setShowPasswords({
+        password: false,
+        confirm_password: false,
+      });
       setTimeout(() => {
         router.push("/login");
       }, 2000);
@@ -79,7 +95,7 @@ const SignupPage: React.FC = () => {
           </h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {(Object.keys(formData) as Array<keyof typeof formData>).map((key) => (
-              <div key={key}>
+              <div key={key} className={key.includes("password") ? "relative" : ""}>
                 <label className="block text-sm font-medium text-gray-300 capitalize">
                   {key.replace("_", " ")}
                 </label>
@@ -98,14 +114,37 @@ const SignupPage: React.FC = () => {
                   </select>
                 ) : (
                   <input
-                    type={key.includes("password") ? "password" : key === "email" ? "email" : "text"}
+                    type={
+                      key === "password"
+                        ? showPasswords.password
+                          ? "text"
+                          : "password"
+                        : key === "confirm_password"
+                        ? showPasswords.confirm_password
+                          ? "text"
+                          : "password"
+                        : key === "email"
+                        ? "email"
+                        : "text"
+                    }
                     name={key}
                     value={formData[key] as string}
                     onChange={handleChange}
-                    required
-                    className="mt-1 block w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
-                    placeholder={`Enter your ${key.replace("_", " ")}`}
+                    required={key !== "middle_name"} // Make middle_name optional
+                    className={`mt-1 block w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 ${
+                      key.includes("password") ? "pr-10" : ""
+                    }`}
+                    placeholder={`Enter your ${key.replace("_", " ")}${key === "middle_name" ? " (optional)" : ""}`}
                   />
+                )}
+                {key.includes("password") && (
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility(key as keyof typeof showPasswords)}
+                    className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
+                  >
+                    {showPasswords[key as keyof typeof showPasswords] ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 )}
                 {errors[key] && (
                   <p className="text-red-400 text-sm mt-1">{errors[key]}</p>
@@ -153,12 +192,7 @@ const SignupPage: React.FC = () => {
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900/80 backdrop-blur-md text-center py-6">
-        <p className="text-sm text-gray-400">
-          © {new Date().getFullYear()} Home Services. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 };
