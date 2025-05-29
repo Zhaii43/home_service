@@ -862,41 +862,43 @@ const ServiceDetailsContent: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
       <Header />
-      <main className="flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex flex-col items-center px-2 sm:px-4 lg:px-8 py-4">
         <motion.div
-          className="w-full max-w-5xl bg-gray-800/50 border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
+          className="w-full max-w-lg sm:max-w-2xl md:max-w-3xl bg-gray-800/50 border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
           variants={cardAnimation}
           initial="hidden"
           animate="visible"
         >
-          <div className="flex flex-col lg:flex-row">
-            <div className="relative w-full lg:w-1/2 h-80 lg:h-auto">
+          <div className="flex flex-col md:flex-row">
+            <div className="relative w-full md:w-1/2 h-48 md:h-80">
               {service.images?.length > 0 ? (
                 <Image
                   src={service.images[0].image}
                   alt={service.title}
                   fill
                   style={{ objectFit: "cover" }}
-                  className="rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none"
+                  className="rounded-t-xl md:rounded-l-xl md:rounded-tr-none"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
                 />
               ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-600 text-gray-400">
+                <div className="flex items-center justify-center w-full h-full bg-gray-600 text-gray-400 text-sm">
                   No image available
                 </div>
               )}
-              <div className="absolute inset-0 rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none bg-gradient-to-br from-purple-500/20 to-transparent"></div>
+              <div className="absolute inset-0 rounded-t-xl md:rounded-l-xl md:rounded-tr-none bg-gradient-to-br from-purple-500/20 to-transparent"></div>
             </div>
-            <div className="w-full lg:w-1/2 p-6">
-              <h1 className="text-3xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+            <div className="w-full md:w-1/2 p-4 md:p-6">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
                 {service.title}
               </h1>
-              <p className="text-gray-300 mb-2">{service.description}</p>
-              <p className="text-gray-300 mb-2">
+              <p className="text-gray-300 mb-2 text-sm md:text-base">{service.description}</p>
+              <p className="text-gray-300 mb-2 text-sm md:text-base">
                 <span className="font-semibold text-white">Location:</span>{" "}
                 <span className="text-purple-400">{service.location}</span>
               </p>
               {!isLoggedIn && (
-                <p className="text-yellow-400 text-sm">
+                <p className="text-yellow-400 text-xs md:text-sm">
                   <span className="font-semibold">Note:</span> You must be logged in to make a reservation.
                 </p>
               )}
@@ -909,7 +911,7 @@ const ServiceDetailsContent: React.FC = () => {
                   setIsBookingModalOpen(true);
                   setBookingError(null);
                 }}
-                className="mt-4 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-700 hover:to-purple-700 hover:scale-105 transition-all duration-300"
+                className="mt-3 md:mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-700 hover:to-purple-700 hover:scale-105 transition-all duration-300 text-sm md:text-base"
               >
                 Book Now
               </button>
@@ -1234,19 +1236,19 @@ const ServiceDetailsContent: React.FC = () => {
         )}
 
         <motion.div
-          className="w-full max-w-6xl mt-8"
+          className="w-full max-w-lg sm:max-w-2xl md:max-w-4xl mt-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
             Gallery
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
             {service.images?.map((image: ImageType) => (
               <motion.div
                 key={image.id}
-                className="relative w-full h-48 rounded-lg shadow-lg overflow-hidden"
+                className="relative w-full h-28 sm:h-32 md:h-40 rounded-lg shadow-lg overflow-hidden"
                 variants={cardAnimation}
                 initial="hidden"
                 animate="visible"
@@ -1257,6 +1259,8 @@ const ServiceDetailsContent: React.FC = () => {
                   fill
                   style={{ objectFit: "cover" }}
                   className="hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  priority={false}
                 />
               </motion.div>
             ))}
@@ -1264,12 +1268,12 @@ const ServiceDetailsContent: React.FC = () => {
         </motion.div>
 
         <motion.div
-          className="w-full max-w-6xl mt-8 mb-8"
+          className="w-full max-w-lg sm:max-w-2xl md:max-w-4xl mt-6 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
             Customer Reviews
           </h2>
           {isLoggedIn && (
