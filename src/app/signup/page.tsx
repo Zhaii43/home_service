@@ -59,7 +59,7 @@ const SignupPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/user/register/", formData);
+      await axios.post("https://backend-r9v8.onrender.com/api/user/register/", formData);
       setSuccessMessage("Account created successfully! Redirecting...");
       setShowPasswords({
         password: false,

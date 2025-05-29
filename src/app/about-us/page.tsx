@@ -22,7 +22,7 @@ export default function About() {
 
   const fetchUserDetails = async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me/", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/user/me/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Assuming username might be used in Header component

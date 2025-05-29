@@ -89,7 +89,7 @@ export default function Home() {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/service-images");
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/service-images");
       setServices(response.data);
     } catch (error) {
       console.error("Failed to fetch services:", error);

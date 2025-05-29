@@ -84,7 +84,7 @@ export default function Header() {
 
   const fetchUserDetails = async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me/", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/user/me/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsername(response.data.username);
@@ -95,7 +95,7 @@ export default function Header() {
 
   const fetchBookings = async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/bookings/my/", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/bookings/my/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const bookingsData = response.data.map((booking: BookingApiResponse) => ({
@@ -121,7 +121,7 @@ export default function Header() {
     try {
       const refreshToken = localStorage.getItem("refresh_token");
       if (refreshToken) {
-        await axios.post("http://127.0.0.1:8000/api/user/logout/", {
+        await axios.post("https://backend-r9v8.onrender.com/api/user/logout/", {
           refresh_token: refreshToken,
         });
       }

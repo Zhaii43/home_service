@@ -152,7 +152,7 @@ function MyBookingContent() {
 
   const fetchBookings = useCallback(async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/bookings/my/", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/bookings/my/", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const bookingsData = response.data.map((booking: BookingApiResponse) => ({
@@ -207,7 +207,7 @@ function MyBookingContent() {
         setError("Authentication token missing.");
         return;
       }
-      const response = await axios.get(`http://127.0.0.1:8000/api/services/${serviceId}/`, {
+      const response = await axios.get(`https://backend-r9v8.onrender.com/api/services/${serviceId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const workSpecs = Array.isArray(response.data.work_specifications)
@@ -268,7 +268,7 @@ function MyBookingContent() {
         .filter((spec) => selectedWorkSpecs.includes(spec.id))
         .reduce((sum, spec) => sum + Number(spec.price), 0);
       await axios.patch(
-        `http://127.0.0.1:8000/api/bookings/${selectedBooking.id}/`,
+        `https://backend-r9v8.onrender.com/api/bookings/${selectedBooking.id}/`,
         {
           booking_date: newDate,
           booking_time: newTime,
@@ -324,7 +324,7 @@ function MyBookingContent() {
         setError("Authentication token missing.");
         return;
       }
-      await axios.delete(`http://127.0.0.1:8000/api/bookings/${selectedBooking.id}/`, {
+      await axios.delete(`https://backend-r9v8.onrender.com/api/bookings/${selectedBooking.id}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBookings((prev) => prev.filter((b) => b.id !== selectedBooking.id));

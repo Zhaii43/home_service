@@ -51,7 +51,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   console.log("Submitting form data:", { ...formData, image: image?.name });
 
   try {
-    const response = await axios.post("http://127.0.0.1:8000/api/contact/", data, {
+    const response = await axios.post("https://backend-r9v8.onrender.com/api/contact/", data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     setStatus(response.data.message);

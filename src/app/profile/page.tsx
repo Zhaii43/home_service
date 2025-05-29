@@ -27,7 +27,7 @@ function ProfileContent() {
 
   const fetchUserDetails = useCallback(async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("User details response:", response.data);

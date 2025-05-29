@@ -235,7 +235,7 @@ const ServiceDetailsContent: React.FC = () => {
       }
 
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/users/me/", {
+        const response = await axios.get("https://backend-r9v8.onrender.com/api/users/me/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -288,7 +288,7 @@ const ServiceDetailsContent: React.FC = () => {
           }
         : {};
       const response = await axios.get<ServiceType>(
-        `http://127.0.0.1:8000/api/services/${serviceId}/`,
+        `https://backend-r9v8.onrender.com/api/services/${serviceId}/`,
         config
       );
       setService({
@@ -553,7 +553,7 @@ const ServiceDetailsContent: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/bookings/",
+        "https://backend-r9v8.onrender.com/api/bookings/",
         payload,
         {
           headers: {
@@ -663,14 +663,14 @@ const ServiceDetailsContent: React.FC = () => {
 
     try {
       if (editingReviewId) {
-        await axios.patch(`http://127.0.0.1:8000/api/reviews/${editingReviewId}/`, payload, {
+        await axios.patch(`https://backend-r9v8.onrender.com/api/reviews/${editingReviewId}/`, payload, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
       } else {
-        await axios.post(`http://127.0.0.1:8000/api/services/${serviceId}/reviews/`, payload, {
+        await axios.post(`https://backend-r9v8.onrender.com/api/services/${serviceId}/reviews/`, payload, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -716,7 +716,7 @@ const ServiceDetailsContent: React.FC = () => {
 
     setIsDeletingReview(reviewId);
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/reviews/${reviewId}/`, {
+      await axios.delete(`https://backend-r9v8.onrender.com/api/reviews/${reviewId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setReviewError(null);
@@ -774,14 +774,14 @@ const ServiceDetailsContent: React.FC = () => {
 
     try {
       if (editingReplyId) {
-        await axios.patch(`http://127.0.0.1:8000/api/replies/${editingReplyId}/`, payload, {
+        await axios.patch(`https://backend-r9v8.onrender.com/api/replies/${editingReplyId}/`, payload, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
       } else {
-        await axios.post(`http://127.0.0.1:8000/api/reviews/${reviewId}/replies/`, payload, {
+        await axios.post(`https://backend-r9v8.onrender.com/api/reviews/${reviewId}/replies/`, payload, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -830,7 +830,7 @@ const ServiceDetailsContent: React.FC = () => {
 
     setIsDeletingReply(replyId);
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/replies/${replyId}/`, {
+      await axios.delete(`https://backend-r9v8.onrender.com/api/replies/${replyId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setReplyError(null);

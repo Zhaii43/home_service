@@ -36,7 +36,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/user/login/", {
+      const response = await axios.post("https://backend-r9v8.onrender.com/api/user/login/", {
         email,
         password,
       });

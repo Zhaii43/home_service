@@ -64,7 +64,7 @@ function EditProfileContent() {
 
   const fetchUserDetails = useCallback(async (token: string) => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/user/me", {
+      const response = await axios.get("https://backend-r9v8.onrender.com/api/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("User details response:", response.data);
@@ -157,7 +157,7 @@ function EditProfileContent() {
       }
 
       const response = await axios.put(
-        "http://127.0.0.1:8000/api/user/update/",
+        "https://backend-r9v8.onrender.com/api/user/update/",
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
