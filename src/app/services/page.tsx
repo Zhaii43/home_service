@@ -42,7 +42,6 @@ function ServicesContent() {
   const fetchServices = async () => {
     try {
       const response = await axios.get("https://backend-r9v8.onrender.com/api/service-images");
-      console.log("API Response:", response.data);
       setServices(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -163,7 +162,6 @@ function ServicesContent() {
                         fill
                         style={{ objectFit: "cover" }}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => console.error(`Failed to load image: ${service.images[0].image}`, e)}
                       />
                     ) : (
                       <div className="flex items-center justify-center w-full h-full bg-gray-700 text-sm text-gray-400">
@@ -193,7 +191,7 @@ function ServicesContent() {
         </section>
       </main>
 
-      <Footer />
+    <Footer />
     </div>
   );
 }
