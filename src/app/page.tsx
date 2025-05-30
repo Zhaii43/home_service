@@ -106,8 +106,6 @@ export default function Home() {
 
 const uniqueCategories = [...new Set(services.map((service) => service.category))]
   .filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()))
-  .slice(0, 6)
-  .concat(Array(6).fill(null).slice(0, 6 - [...new Set(services.map((service) => service.category))].filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase())).length))
   .slice(0, 6);
 
   const featuredServices = services
