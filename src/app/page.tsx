@@ -58,21 +58,21 @@ export default function Home() {
     {
       id: 1,
       name: "Carl Christian",
-      text: "&quot;The plumbing service was fantastic! Quick, professional, and affordable.&quot;",
+      text: "\"The plumbing service was fantastic! Quick, professional, and affordable.\"",
       rating: 5,
       avatar: "/images/carl.jpg",
     },
     {
       id: 2,
       name: "Ralph Villarojo",
-      text: "&quot;I had an amazing experience with the cleaning service. Highly recommend!&quot;",
+      text: "\"I had an amazing experience with the cleaning service. Highly recommend!\"",
       rating: 4,
       avatar: "/images/ralph.jpg",
     },
     {
       id: 3,
       name: "Brian Labago",
-      text: "&quot;The renovation team transformed my home beautifully. Great work!&quot;",
+      text: "\"The renovation team transformed my home beautifully. Great work!\"",
       rating: 5,
       avatar: "/images/brian.jpg",
     },
@@ -266,65 +266,81 @@ export default function Home() {
         </aside>
 
         <section className="flex-1 lg:pl-8">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-white tracking-tight">
             Discover Top Home Services
           </h2>
-          <p className="text-base sm:text-lg text-gray-200 mb-6 max-w-2xl leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-200 mb-4 max-w-2xl leading-relaxed">
             Connect with trusted professionals for all your home needs, from repairs to renovations.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.length > 0 ? (
-              filteredServices.map((service) => (
-                <motion.div
-                  key={service.id}
-                  className="bg-gradient-to-br from-gray-800 to-gray-85 border border-gray-700/30 rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-500 ease-out"
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  whileHover={{
-                    scale: 1.05,
-                    y: -10,
-                    transition: { duration: 0.4, ease: "easeOut" },
-                  }}
-                >
-                  <div className="relative w-full h-48 sm:h-56 flex-shrink-0 group z-10">
-                    {service.images.length > 0 ? (
-                      <>
-                        <Image
-                          src={service.images[0].image}
-                          alt={service.title}
-                          fill
-                          style={{ objectFit: "cover" }}
-                          className="object-cover transition-transform duration-600 ease-out rounded-t-2xl group-hover:scale-100"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-all duration-600 ease-out group-hover:from-purple-900/60 group-hover:to-transparent group-hover:shadow-[0_10px_20px_rgba(128,0,255,0.3)] rounded-t-2xl" />
-                      </>
-                    ) : (
-                      <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 text-sm text-gray-300 font-medium">
-                        No Image Available
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4 sm:p-6 flex flex-col flex-grow">
-                    <h4 className="text-lg sm:text-xl font-bold text-white mb-2 truncate">{service.title}</h4>
-                    <p className="text-sm text-gray-300 mb-3 line-clamp-2 leading-relaxed">{service.description}</p>
-                    <p className="text-sm text-gray-200 font-medium mb-4 truncate">
-                      <span className="text-purple-400">Location:</span> {service.location}
-                    </p>
-                    <Link
-                      href={`/service-details?id=${service.id}`}
-                      className="mt-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white text-sm font-semibold rounded-xl hover:from-purple-700 hover:to-purple-600 hover:scale-105 transform transition-all duration-300 text-center"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full flex items-center justify-center h-48 text-gray-300 text-base sm:text-lg font-medium bg-gray-800/30 rounded-xl">
-                No services available for this category.
-              </div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(() => {
+              // Group services by category and limit to 5 per category
+              const groupedServices = filteredServices.reduce((acc, service) => {
+                if (!acc[service.category]) {
+                  acc[service.category] = [];
+                }
+                acc[service.category].push(service);
+                return acc;
+              }, {} as { [key: string]: ServiceType[] });
+
+              // Limit to 5 services per category
+              const limitedServices = Object.values(groupedServices)
+                .flatMap((services) => services.slice(0, 5))
+                .sort((a, b) => a.category.localeCompare(b.category));
+
+              return limitedServices.length > 0 ? (
+                limitedServices.map((service) => (
+                  <motion.div
+                    key={service.id}
+                    className="bg-gradient-to-br from-gray-800 to-gray-85 border border-gray-700/30 rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-500 ease-out"
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    whileHover={{
+                      scale: 1.05,
+                      y: -10,
+                      transition: { duration: 0.4, ease: "easeOut" },
+                    }}
+                  >
+                    <div className="relative w-full h-36 sm:h-48 flex-shrink-0 group z-10">
+                      {service.images.length > 0 ? (
+                        <>
+                          <Image
+                            src={service.images[0].image}
+                            alt={service.title}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            className="object-cover transition-transform duration-600 ease-out rounded-t-2xl group-hover:scale-100"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-all duration-600 ease-out group-hover:from-purple-900/60 group-hover:to-transparent group-hover:shadow-[0_10px_20px_rgba(128,0,255,0.3)] rounded-t-2xl" />
+                        </>
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 text-xs sm:text-sm text-gray-300 font-medium">
+                          No Image Available
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 sm:p-4 flex flex-col flex-grow">
+                      <h4 className="text-base sm:text-lg font-bold text-white mb-1 truncate">{service.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-300 mb-2 line-clamp-2 leading-relaxed">{service.description}</p>
+                      <p className="text-xs sm:text-sm text-gray-200 font-medium mb-3 truncate">
+                        <span className="text-purple-400">Location:</span> {service.location}
+                      </p>
+                      <Link
+                        href={`/service-details?id=${service.id}`}
+                        className="mt-auto px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs sm:text-sm font-semibold rounded-xl hover:from-purple-700 hover:to-purple-600 hover:scale-105 transform transition-all duration-300 text-center"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full flex items-center justify-center h-36 text-gray-300 text-sm sm:text-base font-medium bg-gray-800/30 rounded-xl">
+                  No services available for this category.
+                </div>
+              );
+            })()}
           </div>
         </section>
       </motion.main>
