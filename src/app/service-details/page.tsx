@@ -108,7 +108,7 @@ const cardAnimation: Variants = {
 };
 
 const modalAnimation: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
+  hidden: { opacity: 0, scale: 0.95 },
   visible: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
 };
 
@@ -131,7 +131,6 @@ const qrScanAnimation: Variants = {
   },
 };
 
-// Helper function to generate time options in PHT (24-hour format) from 9:00 AM to 7:00 PM
 const generateTimeOptions = (): string[] => {
   const options: string[] = [];
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -150,7 +149,6 @@ const generateTimeOptions = (): string[] => {
   return options;
 };
 
-// Helper function to format time for display in 12-hour format with AM/PM
 const formatTimeTo12Hour = (time: string): string => {
   const [hour, minute] = time.split(":");
   const date = new Date();
@@ -163,7 +161,6 @@ const formatTimeTo12Hour = (time: string): string => {
   }).format(date);
 };
 
-// Helper function to convert 12-hour format to 24-hour format
 const convertTo24Hour = (time: string): string => {
   const [timePart, modifier] = time.split(" ");
   const [hours, minutes] = timePart.split(":");
@@ -198,7 +195,7 @@ const ServiceDetailsContent: React.FC = () => {
   const [position, setPosition] = useState<[number, number]>([10.3157, 123.8854]);
   const [address, setAddress] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [isMounted, setRatingVisible] = useState<boolean>(false);
   const [rating, setRating] = useState<number>(0);
   const [ratingLabel, setRatingLabel] = useState<string>("");
   const [comment, setComment] = useState<string>("");
@@ -219,7 +216,6 @@ const ServiceDetailsContent: React.FC = () => {
     { value: "Excellent Job", label: "Excellent Job" },
   ];
 
-  // Fetch user email from localStorage or API
   useEffect(() => {
     const fetchUserEmail = async () => {
       const storedEmail = localStorage.getItem("email");
@@ -252,14 +248,13 @@ const ServiceDetailsContent: React.FC = () => {
   }, [isLoggedIn]);
 
   useEffect(() => {
-    setIsMounted(true);
+    setRatingVisible(true);
   }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && isMounted) {
       import("leaflet")
         .then((L) => {
-          // Set default icon options for Leaflet markers
           L.Icon.Default.mergeOptions({
             iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
             iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -272,7 +267,6 @@ const ServiceDetailsContent: React.FC = () => {
     }
   }, [isMounted]);
 
-  // Check login status and fetch service details
   const fetchServiceDetails = useCallback(async () => {
     if (!serviceId) {
       setBookingError("No service ID provided");
@@ -567,7 +561,6 @@ const ServiceDetailsContent: React.FC = () => {
       setBookingError(null);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // FIX: Remove 'any' by using a type guard and type assertion
         const errorData: unknown = error.response?.data;
         console.error("Booking error details:", {
           status: error.response?.status,
@@ -578,7 +571,6 @@ const ServiceDetailsContent: React.FC = () => {
         if (!error.response) {
           setBookingError("Network error: Could not reach the server. Please check your connection.");
         } else if (error.response.status === 400) {
-          // Use type guards and type assertions instead of 'any'
           const hasNonFieldErrors =
             errorData &&
             typeof errorData === "object" &&
@@ -860,84 +852,84 @@ const ServiceDetailsContent: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
+    <div className="min-h-screen bg-gray-900 font-sans">
       <Header />
-      <main className="flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
-          className="w-full max-w-5xl bg-gray-800/50 border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-gray-800/80 rounded-2xl shadow-xl overflow-hidden border border-gray-700"
           variants={cardAnimation}
           initial="hidden"
           animate="visible"
         >
-          <div className="flex flex-col lg:flex-row">
-            <div className="relative w-full lg:w-1/2 h-80 lg:h-auto">
-              {service.images?.length > 0 ? (
-                <Image
-                  src={service.images[0].image}
-                  alt={service.title}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  className="rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none"
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-600 text-gray-400">
-                  No image available
-                </div>
-              )}
-              <div className="absolute inset-0 rounded-t-xl lg:rounded-l-xl lg:rounded-tr-none bg-gradient-to-br from-purple-500/20 to-transparent"></div>
-            </div>
-            <div className="w-full lg:w-1/2 p-6">
-              <h1 className="text-3xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+          <div className="relative h-[400px] lg:h-auto">
+            {service.images?.length > 0 ? (
+              <Image
+                src={service.images[0].image}
+                alt={service.title}
+                fill
+                style={{ objectFit: "contain" }}
+                className="rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none bg-gray-700"
+              />
+            ) : (
+              <div className="flex items-center justify-center w-full h-full bg-gray-700 text-gray-400">
+                No image available
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-transparent rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none" />
+          </div>
+          <div className="p-8 flex flex-col justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-4 bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
                 {service.title}
               </h1>
-              <p className="text-gray-300 mb-2">{service.description}</p>
-              <p className="text-gray-300 mb-2">
+              <p className="text-gray-300 mb-4 text-base leading-relaxed">{service.description}</p>
+              <p className="text-gray-300 mb-4">
                 <span className="font-semibold text-white">Location:</span>{" "}
                 <span className="text-purple-400">{service.location}</span>
               </p>
               {!isLoggedIn && (
-                <p className="text-yellow-400 text-sm">
-                  <span className="font-semibold">Note:</span> You must be logged in to make a reservation.
+                <p className="text-yellow-400 text-sm mt-2">
+                  <span className="font-semibold">Note:</span> Please log in to book this service.
                 </p>
               )}
-              <button
-                onClick={() => {
-                  if (!isLoggedIn) {
-                    setIsLoginPromptOpen(true);
-                    return;
-                  }
-                  setIsBookingModalOpen(true);
-                  setBookingError(null);
-                }}
-                className="mt-4 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-700 hover:to-purple-700 hover:scale-105 transition-all duration-300"
-              >
-                Book Now
-              </button>
             </div>
+            <button
+              onClick={() => {
+                if (!isLoggedIn) {
+                  setIsLoginPromptOpen(true);
+                  return;
+                }
+                setIsBookingModalOpen(true);
+                setBookingError(null);
+              }}
+              className="mt-6 w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full hover:from-indigo-700 hover:to-purple-700 transition-all duration-300"
+            >
+              Book Now
+            </button>
           </div>
         </motion.div>
 
         {isLoginPromptOpen && isMounted && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
             initial="hidden"
             animate="visible"
             variants={modalAnimation}
           >
-            <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+            <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
               <h2 className="text-xl font-bold text-white mb-4">Login Required</h2>
-              <p className="text-gray-300 mb-4">
-                You need to be logged in to make a reservation. Please log in or sign up.
+              <p className="text-gray-300 mb-6 text-base">
+                You need to be logged in to make a reservation.
               </p>
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setIsLoginPromptOpen(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <Link href="/login">
-                  <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700">
+                  <button className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-colors">
                     Log In
                   </button>
                 </Link>
@@ -948,13 +940,13 @@ const ServiceDetailsContent: React.FC = () => {
 
         {isBookingModalOpen && isMounted && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md z-50"
+            className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
             initial="hidden"
             animate="visible"
             variants={modalAnimation}
           >
-            <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-lg border border-indigo-500/30">
-              <h2 className="text-xl font-bold text-white mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+            <div className="bg-gray-900 rounded-xl p-8 max-w-lg w-full shadow-2xl border border-indigo-500/30">
+              <h2 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
                 Book Appointment
               </h2>
               {bookingSuccess ? (
@@ -966,68 +958,68 @@ const ServiceDetailsContent: React.FC = () => {
                 >
                   {isPaymentModalOpen && (
                     <motion.div
-                      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50"
+                      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
                       initial="hidden"
                       animate="visible"
                       variants={modalAnimation}
                     >
-                      <div className="bg-gray-900 rounded-lg p-6 max-w-sm w-full shadow-lg border border-indigo-500/30">
+                      <div className="bg-gray-900 rounded-xl p-6 max-w-sm w-full shadow-2xl border border-indigo-500/30">
                         {!paymentConfirmed ? (
                           <>
-                            <h2 className="text-lg font-semibold text-white mb-2">Scan to Pay</h2>
+                            <h2 className="text-xl font-semibold text-white mb-4">Scan to Pay</h2>
                             <p className="text-gray-300 mb-4 text-sm">
-                              Use your mobile device to scan the QR code.
+                              Scan the QR code with your mobile device to complete payment.
                             </p>
-                            <div className="relative flex justify-center mb-4">
-                            {qrCodeUrl ? (
-                              <div className="relative w-48 h-48">
-                                <Image
-                                  src={qrCodeUrl}
-                                  alt="QR Code"
-                                  fill
-                                  style={{ objectFit: "contain" }}
-                                  className="w-full h-full border-2 border-indigo-200 rounded"
-                                  sizes="192px"
-                                  priority={false}
-                                />
-                                <motion.div
-                                  className="absolute top-0 left-0 right-0 h-1 bg-indigo-400/80"
-                                  variants={qrScanAnimation}
-                                  initial="initial"
-                                  animate="animate"
-                                />
-                              </div>
-                            ) : (
-                              <div className="text-center">
-                                <p className="text-red-500 text-sm mb-2">Failed to generate QR code.</p>
-                                <button
-                                  onClick={handleRetryQRCode}
-                                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded hover:from-indigo-700 hover:to-blue-500 text-sm"
-                                >
-                                  Retry QR Code
-                                </button>
-                              </div>
-                            )}
+                            <div className="relative flex justify-center mb-6">
+                              {qrCodeUrl ? (
+                                <div className="relative w-48 h-48">
+                                  <Image
+                                    src={qrCodeUrl}
+                                    alt="QR Code"
+                                    fill
+                                    style={{ objectFit: "contain" }}
+                                    className="border-2 border-indigo-200 rounded-lg"
+                                    sizes="192px"
+                                    priority={false}
+                                  />
+                                  <motion.div
+                                    className="absolute top-0 left-0 right-0 h-1 bg-indigo-400/80"
+                                    variants={qrScanAnimation}
+                                    initial="initial"
+                                    animate="animate"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="text-center">
+                                  <p className="text-red-500 text-sm mb-3">Failed to generate QR code.</p>
+                                  <button
+                                    onClick={handleRetryQRCode}
+                                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-500 text-sm"
+                                  >
+                                    Retry QR Code
+                                  </button>
+                                </div>
+                              )}
                             </div>
-                            <p className="text-gray-300 mb-4 text-sm">
-                              Total Price: PHP {totalPrice.toFixed(2)}
+                            <p className="text-gray-300 mb-6 text-base font-semibold">
+                              Total: PHP {totalPrice.toFixed(2)}
                             </p>
                             <button
                               onClick={() => setTimeout(() => handleMockPayment(), 500)}
-                              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded hover:from-blue-700 hover:to-indigo-700 text-sm"
+                              className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 text-sm"
                             >
                               Simulate QR Scan
                             </button>
                           </>
                         ) : (
                           <>
-                            <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                            <p className="text-green-400 mb-4 text-sm font-semibold">
+                            <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                            <p className="text-green-400 mb-6 text-base font-semibold">
                               Payment Confirmed!
                             </p>
                             <button
                               onClick={handlePrintReceipt}
-                              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                              className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                             >
                               Print Receipt
                             </button>
@@ -1038,28 +1030,30 @@ const ServiceDetailsContent: React.FC = () => {
                   )}
                 </motion.div>
               ) : showMap ? (
-                <div className="space-y-4">
-                  <label className="block text-gray-300 mb-1 text-sm font-semibold">Select Location</label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                      placeholder="Enter address"
-                      className="w-full px-4 py-2 bg-gray-800 rounded border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400"
-                      title="Address search"
-                    />
-                    <button
-                      onClick={handleSearchAddress}
-                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700 text-sm"
-                    >
-                      Search
-                    </button>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-gray-300 mb-2 text-sm font-semibold">Select Location</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                        placeholder="Enter address"
+                        className="flex-1 px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
+                        title="Address search"
+                      />
+                      <button
+                        onClick={handleSearchAddress}
+                        className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm"
+                      >
+                        Search
+                      </button>
+                    </div>
                   </div>
                   <p className="text-gray-400 text-sm">
                     Address: {address || "Click map to select a location"}
                   </p>
-                  <div className="h-48 w-full rounded-lg overflow-hidden border-2 border-indigo-200/30">
+                  <div className="h-64 w-full rounded-lg overflow-hidden border-2 border-indigo-200/30">
                     {isMounted && (
                       <MapContainer
                         center={position as LatLngExpression}
@@ -1084,33 +1078,33 @@ const ServiceDetailsContent: React.FC = () => {
                       {bookingError}
                     </motion.p>
                   )}
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3">
                     <button
                       onClick={() => setShowMap(false)}
-                      className="px-4 py-2 bg-gray-600 text-white rounded slow:bg-gray-700"
+                      className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                     >
                       Back
                     </button>
                     <button
                       onClick={handleBookingSubmit}
-                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700 text-sm"
+                      className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700"
                     >
-                      Confirm
+                      Confirm Booking
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-gray-300 mb-1 text-sm font-semibold">Choose Services</label>
-                    <div className="max-h-36 overflow-y-auto space-y-2">
+                    <label className="block text-gray-300 mb-2 text-sm font-semibold">Choose Services</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
                       {service.work_specifications?.length > 0 ? (
                         service.work_specifications.map((spec: WorkSpecificationType) => (
                           <motion.button
                             key={spec.id}
                             onClick={() => handleWorkSpecToggle(spec.id)}
-                            className={`w-full flex justify-between items-center p-3 rounded border border-gray-600 bg-gray-800/30 hover:bg-gray-50/10 transition-colors duration-200 text-sm ${
-                              selectedWorkSpecs.includes(spec.id) && "border-blue-500 bg-gray-100/10"
+                            className={`flex justify-between items-center p-4 rounded-lg border border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 transition-colors duration-200 text-sm ${
+                              selectedWorkSpecs.includes(spec.id) ? "border-indigo-500 bg-indigo-900/20" : ""
                             }`}
                             variants={itemAnimation}
                             initial="hidden"
@@ -1118,23 +1112,23 @@ const ServiceDetailsContent: React.FC = () => {
                             title={`Select ${spec.name} for PHP ${spec.price.toFixed(2)}`}
                           >
                             <span className="text-white">{spec.name}</span>
-                            <span className="text-gray-400">
+                            <span className="text-gray-400 flex items-center gap-2">
                               PHP {spec.price.toFixed(2)}
                               {selectedWorkSpecs.includes(spec.id) && (
-                                <CheckCircleIcon className="inline h-4 w-4 text-indigo-400 ml-2" />
+                                <CheckCircleIcon className="h-5 w-5 text-indigo-400" />
                               )}
                             </span>
                           </motion.button>
                         ))
                       ) : (
-                        <p className="text-gray-400 text-sm">No services available</p>
+                        <p className="text-gray-400 text-sm col-span-2">No services available</p>
                       )}
                     </div>
                   </div>
-                  <div className="bg-gray-800/50 p-4 rounded border border-indigo-500/30">
-                    <h3 className="text-white font-semibold mb-2 text-sm">Booking Summary</h3>
+                  <div className="bg-gray-800/50 p-5 rounded-lg border border-indigo-500/30">
+                    <h3 className="text-white font-semibold mb-3 text-base">Booking Summary</h3>
                     {selectedWorkSpecs.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {selectedWorkSpecs.map((id: number) => {
                           const spec = service.work_specifications?.find(
                             (s: WorkSpecificationType) => s.id === id
@@ -1154,8 +1148,8 @@ const ServiceDetailsContent: React.FC = () => {
                             )
                           );
                         })}
-                        <div className="border-t border-gray-600 pt-2 mt-2">
-                          <div className="flex justify-between text-white font-semibold text-sm">
+                        <div className="border-t border-gray-600 pt-3 mt-3">
+                          <div className="flex justify-between text-white font-semibold text-base">
                             <span>Total</span>
                             <span>PHP {totalPrice.toFixed(2)}</span>
                           </div>
@@ -1165,9 +1159,9 @@ const ServiceDetailsContent: React.FC = () => {
                       <p className="text-gray-400 text-sm">Select services to see summary</p>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-gray-300 mb-1 text-sm font-semibold">Date</label>
+                      <label className="block text-gray-300 mb-2 text-sm font-semibold">Date</label>
                       <input
                         type="date"
                         value={selectedDate}
@@ -1175,19 +1169,19 @@ const ServiceDetailsContent: React.FC = () => {
                           setSelectedDate(e.target.value)
                         }
                         min={new Date().toISOString().split("T")[0]}
-                        className="w-full px-4 py-2 bg-gray-800 rounded border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400"
+                        className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
                         required
                         title="Select appointment date"
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 mb-1 text-sm font-semibold">Time (PHT)</label>
+                      <label className="block text-gray-300 mb-2 text-sm font-semibold">Time (PHT)</label>
                       <select
                         value={selectedTime}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                           setSelectedTime(e.target.value)
                         }
-                        className="w-full px-4 py-2 bg-gray-800 rounded border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400"
+                        className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
                         required
                         title="Select appointment time"
                       >
@@ -1211,22 +1205,22 @@ const ServiceDetailsContent: React.FC = () => {
                     </motion.p>
                   )}
                   <p className="text-gray-400 text-sm">
-                    Note: Bookings cannot be changed or canceled once confirmed.
+                    Note: Bookings are non-refundable and cannot be changed once confirmed.
                   </p>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3">
                     <button
                       onClick={() => {
                         setIsBookingModalOpen(false);
                         setBookingError(null);
                         setShowMap(false);
                       }}
-                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                      className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleNextToMap}
-                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700"
+                      className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700"
                     >
                       Next
                     </button>
@@ -1238,19 +1232,19 @@ const ServiceDetailsContent: React.FC = () => {
         )}
 
         <motion.div
-          className="w-full max-w-6xl mt-8"
+          className="mt-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
             Gallery
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {service.images?.map((image: ImageType) => (
               <motion.div
                 key={image.id}
-                className="relative w-full h-48 rounded-lg shadow-lg overflow-hidden"
+                className="relative h-64 rounded-lg shadow-lg overflow-hidden"
                 variants={cardAnimation}
                 initial="hidden"
                 animate="visible"
@@ -1259,8 +1253,8 @@ const ServiceDetailsContent: React.FC = () => {
                   src={image.image}
                   alt={service.title}
                   fill
-                  style={{ objectFit: "cover" }}
-                  className="hover:scale-105 transition-transform duration-300"
+                  style={{ objectFit: "contain" }}
+                  className="hover:scale-105 transition-transform duration-300 bg-gray-700"
                 />
               </motion.div>
             ))}
@@ -1268,65 +1262,63 @@ const ServiceDetailsContent: React.FC = () => {
         </motion.div>
 
         <motion.div
-          className="w-full max-w-6xl mt-8 mb-8"
+          className="mt-12 mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <h2 className="text-2xl font-bold text-white mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
             Customer Reviews
           </h2>
           {isLoggedIn && (
-            <form onSubmit={handleReviewSubmit} className="mb-6 bg-gray-800/50 p-4 rounded-lg shadow-lg">
-              <h3 className="text-white mb-2 text-sm font-semibold">
+            <form onSubmit={handleReviewSubmit} className="mb-8 bg-gray-800/50 p-6 rounded-xl shadow-lg">
+              <h3 className="text-white font-semibold mb-4 text-base">
                 {editingReviewId ? "Edit Your Review" : "Write a Review"}
               </h3>
-              <div className="mb-2">
-                <label className="block text-gray-300 mb-1 text-sm">Rating</label>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex gap-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-300 mb-2 text-sm font-semibold">Rating</label>
+                  <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setRating(star)}
-                        className={`text-lg ${rating >= star ? "text-yellow-400" : "text-gray-400"} hover:text-yellow-300`}
+                        className={`text-2xl ${rating >= star ? "text-yellow-400" : "text-gray-400"} hover:text-yellow-300 transition-colors`}
                       >
                         ★
                       </button>
                     ))}
                   </div>
-                  <span className="text-gray-400 mx-2">|</span>
-                  <div className="flex gap-1 flex-wrap">
+                </div>
+                <div>
+                  <label className="block text-gray-300 mb-2 text-sm font-semibold">Rating Label</label>
+                  <select
+                    value={ratingLabel}
+                    onChange={(e) => setRatingLabel(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
+                  >
+                    <option value="">Select rating label</option>
                     {RATING_LABEL_OPTIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setRatingLabel(option.value)}
-                        className={`px-2 py-1 rounded text-sm ${
-                          ratingLabel === option.value
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-600/50 text-gray-300 hover:bg-gray-600"
-                        }`}
-                      >
+                      <option key={option.value} value={option.value}>
                         {option.label}
-                      </button>
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               </div>
-              <div className="mb-2">
-                <label className="block text-gray-300 mb-1 text-sm">Comment</label>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2 text-sm font-semibold">Comment</label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Write your comment..."
                   rows={4}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400"
+                  className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
                 />
               </div>
-              {reviewError && <p className="text-red-500 text-sm mb-2">{reviewError}</p>}
-              <div className="flex justify-end gap-2">
+              {reviewError && <p className="text-red-500 text-sm mb-3">{reviewError}</p>}
+              <div className="flex justify-end gap-3">
                 {editingReviewId && (
                   <button
                     type="button"
@@ -1337,34 +1329,34 @@ const ServiceDetailsContent: React.FC = () => {
                       setComment("");
                       setReviewError(null);
                     }}
-                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                   >
                     Cancel Edit
                   </button>
                 )}
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700"
+                  className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700"
                 >
                   {editingReviewId ? "Update Review" : "Submit Review"}
                 </button>
               </div>
             </form>
           )}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {service.reviews?.length > 0 ? (
               service.reviews.map((review: ReviewType) => (
                 <motion.div
                   key={review.id}
-                  className="bg-gray-800/50 p-4 rounded-lg border border-gray-600"
+                  className="bg-gray-800/50 p-6 rounded-xl border border-gray-600 shadow-lg"
                   variants={cardAnimation}
                   initial="hidden"
                   animate="visible"
                 >
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
                     <div>
-                      <p className="text-white font-semibold text-sm">{review.user}</p>
-                      <div className="flex items-center gap-2">
+                      <p className="text-white font-semibold text-base">{review.user}</p>
+                      <div className="flex items-center gap-2 mt-1">
                         <div className="flex">
                           {[1, 2, 3, 4, 5].map((i) => (
                             <span key={i} className={i <= review.rating ? "text-yellow-400" : "text-gray-400"}>
@@ -1376,7 +1368,7 @@ const ServiceDetailsContent: React.FC = () => {
                       </div>
                     </div>
                     {isLoggedIn && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-3 mt-2 sm:mt-0">
                         <button
                           onClick={() => handleReviewEdit(review)}
                           className="text-indigo-400 hover:text-indigo-300 text-sm"
@@ -1394,24 +1386,24 @@ const ServiceDetailsContent: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-gray-300 text-sm mb-2">{review.comment}</p>
+                  <p className="text-gray-300 text-sm mb-3">{review.comment}</p>
                   <p className="text-gray-500 text-xs">
                     Posted on {new Date(review.created_at).toLocaleDateString()}
                   </p>
                   {review.replies?.length > 0 && (
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 space-y-3">
                       {review.replies.map((reply: ReplyType) => (
                         <motion.div
                           key={reply.id}
-                          className="bg-gray-700/50 p-3 rounded border-l-4 border-indigo-500"
+                          className="bg-gray-700/50 p-4 rounded-lg border-l-4 border-indigo-500"
                           variants={itemAnimation}
                           initial="hidden"
                           animate="visible"
                         >
-                          <div className="flex justify-between items-center mb-1">
+                          <div className="flex justify-between items-center mb-2">
                             <p className="text-white font-semibold text-sm">{reply.user}</p>
                             {isLoggedIn && (
-                              <div className="flex gap-2">
+                              <div className="flex gap-3">
                                 <button
                                   onClick={() => handleReplyEdit(reply, review.id)}
                                   className="text-indigo-400 hover:text-indigo-300 text-sm"
@@ -1430,7 +1422,7 @@ const ServiceDetailsContent: React.FC = () => {
                             )}
                           </div>
                           <p className="text-gray-300 text-sm">{reply.comment}</p>
-                          <p className="text-gray-500 text-xs">
+                          <p className="text-gray-500 text-xs mt-1">
                             Replied on {new Date(reply.created_at).toLocaleDateString()}
                           </p>
                         </motion.div>
@@ -1451,11 +1443,11 @@ const ServiceDetailsContent: React.FC = () => {
                           }))
                         }
                         placeholder="Write a reply..."
-                        rows={2}
-                        className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
+                        rows={3}
+                        className="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
                       />
-                      {replyError && <p className="text-red-500 text-sm mt-1">{replyError}</p>}
-                      <div className="flex justify-end gap-2 mt-2">
+                      {replyError && <p className="text-red-500 text-sm mt-2">{replyError}</p>}
+                      <div className="flex justify-end gap-3 mt-3">
                         {editingReplyId && (
                           <button
                             type="button"
@@ -1464,14 +1456,14 @@ const ServiceDetailsContent: React.FC = () => {
                               setReplyComment((prev) => ({ ...prev, [review.id]: "" }));
                               setReplyError(null);
                             }}
-                            className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm"
+                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                           >
                             Cancel
                           </button>
                         )}
                         <button
                           type="submit"
-                          className="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded hover:from-indigo-700 hover:to-purple-700 text-sm"
+                          className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm"
                         >
                           {editingReplyId ? "Update Reply" : "Post Reply"}
                         </button>
@@ -1481,7 +1473,7 @@ const ServiceDetailsContent: React.FC = () => {
                 </motion.div>
               ))
             ) : (
-              <p className="text-gray-400 text-center">No reviews yet.</p>
+              <p className="text-gray-400 text-center text-base">No reviews yet.</p>
             )}
           </div>
         </motion.div>
