@@ -575,17 +575,26 @@ const ServiceDetailsContent: React.FC = () => {
             errorData &&
             typeof errorData === "object" &&
             "non_field_errors" in errorData &&
-            Array.isArray((errorData as { non_field_errors?: string[] }).non_field_errors);
+            Array.isArray((errorData as { non_field_errors?: string[] }).non_field_errors) &&
+            (errorData as { non_field_errors?: string[] }).non_field_errors?.includes(
+              "The fields service, booking_date, booking_time must make a unique set."
+            );
 
           if (hasNonFieldErrors) {
-            const errorMessage = (errorData as { non_field_errors?: string[] }).non_field_errors?.[0];
-            setBookingError(errorMessage || "Invalid booking details.");
+            setBookingError(
+              `This time slot (${formatTimeTo12Hour(timeIn24Hour)}) on ${selectedDate} is already booked. Please choose a different time or date.`
+            );
           } else {
             setBookingError(
               (errorData &&
                 typeof errorData === "object" &&
                 "detail" in errorData
                 ? (errorData as { detail?: string }).detail
+                : undefined) ||
+              (errorData &&
+                typeof errorData === "object" &&
+                "non_field_errors" in errorData
+                ? (errorData as { non_field_errors?: string[] }).non_field_errors?.join(" ")
                 : undefined) ||
               (errorData &&
                 typeof errorData === "object" &&
