@@ -945,10 +945,24 @@ const ServiceDetailsContent: React.FC = () => {
             animate="visible"
             variants={modalAnimation}
           >
-            <div className="bg-gray-900 rounded-xl p-8 max-w-lg w-full shadow-2xl border border-indigo-500/30">
-              <h2 className="text-2xl font-bold text-white mb-6 bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
-                Book Appointment
-              </h2>
+            <div className="bg-gray-900 rounded-xl p-6 max-w-lg w-full shadow-2xl border border-indigo-500/30">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
+                  Book Appointment
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsBookingModalOpen(false);
+                    setBookingError(null);
+                    setShowMap(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-200"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
               {bookingSuccess ? (
                 <motion.div
                   className="text-center"
@@ -1094,120 +1108,122 @@ const ServiceDetailsContent: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-gray-300 mb-2 text-sm font-semibold">Choose Services</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
-                      {service.work_specifications?.length > 0 ? (
-                        service.work_specifications.map((spec: WorkSpecificationType) => (
-                          <motion.button
-                            key={spec.id}
-                            onClick={() => handleWorkSpecToggle(spec.id)}
-                            className={`flex justify-between items-center p-4 rounded-lg border border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 transition-colors duration-200 text-sm ${
-                              selectedWorkSpecs.includes(spec.id) ? "border-indigo-500 bg-indigo-900/20" : ""
-                            }`}
-                            variants={itemAnimation}
-                            initial="hidden"
-                            animate="visible"
-                            title={`Select ${spec.name} for PHP ${spec.price.toFixed(2)}`}
-                          >
-                            <span className="text-white">{spec.name}</span>
-                            <span className="text-gray-400 flex items-center gap-2">
-                              PHP {spec.price.toFixed(2)}
-                              {selectedWorkSpecs.includes(spec.id) && (
-                                <CheckCircleIcon className="h-5 w-5 text-indigo-400" />
-                              )}
-                            </span>
-                          </motion.button>
-                        ))
-                      ) : (
-                        <p className="text-gray-400 text-sm col-span-2">No services available</p>
-                      )}
+                <div className="space-y-6 flex flex-col h-[70vh]">
+                  <div className="flex-1 overflow-y-auto space-y-6">
+                    <div>
+                      <label className="block text-gray-300 mb-2 text-sm font-semibold">Choose Services</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 h-48 overflow-y-auto pr-2 bg-gray-800/30 rounded-lg p-2">
+                        {service.work_specifications?.length > 0 ? (
+                          service.work_specifications.map((spec: WorkSpecificationType) => (
+                            <motion.button
+                              key={spec.id}
+                              onClick={() => handleWorkSpecToggle(spec.id)}
+                              className={`flex justify-between items-center p-3 rounded-lg border border-gray-600 bg-gray-800/50 hover:bg-gray-700/50 transition-colors duration-200 text-sm ${
+                                selectedWorkSpecs.includes(spec.id) ? "border-indigo-500 bg-indigo-900/20" : ""
+                              }`}
+                              variants={itemAnimation}
+                              initial="hidden"
+                              animate="visible"
+                              title={`Select ${spec.name} for PHP ${spec.price.toFixed(2)}`}
+                            >
+                              <span className="text-white">{spec.name}</span>
+                              <span className="text-gray-400 flex items-center gap-2">
+                                PHP {spec.price.toFixed(2)}
+                                {selectedWorkSpecs.includes(spec.id) && (
+                                  <CheckCircleIcon className="h-5 w-5 text-indigo-400" />
+                                )}
+                              </span>
+                            </motion.button>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-sm col-span-2">No services available</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="bg-gray-800/50 p-5 rounded-lg border border-indigo-500/30">
-                    <h3 className="text-white font-semibold mb-3 text-base">Booking Summary</h3>
-                    {selectedWorkSpecs.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedWorkSpecs.map((id: number) => {
-                          const spec = service.work_specifications?.find(
-                            (s: WorkSpecificationType) => s.id === id
-                          );
-                          return (
-                            spec && (
-                              <motion.div
-                                key={id}
-                                className="flex justify-between text-gray-300 text-sm"
-                                variants={itemAnimation}
-                                initial="hidden"
-                                animate="visible"
-                              >
-                                <span>{spec.name}</span>
-                                <span>PHP {spec.price.toFixed(2)}</span>
-                              </motion.div>
-                            )
-                          );
-                        })}
-                        <div className="border-t border-gray-600 pt-3 mt-3">
-                          <div className="flex justify-between text-white font-semibold text-base">
-                            <span>Total</span>
-                            <span>PHP {totalPrice.toFixed(2)}</span>
+                    <div className="bg-gray-800/50 p-4 rounded-lg border border-indigo-500/30">
+                      <h3 className="text-white font-semibold mb-3 text-base">Booking Summary</h3>
+                      {selectedWorkSpecs.length > 0 ? (
+                        <div className="space-y-3">
+                          {selectedWorkSpecs.map((id: number) => {
+                            const spec = service.work_specifications?.find(
+                              (s: WorkSpecificationType) => s.id === id
+                            );
+                            return (
+                              spec && (
+                                <motion.div
+                                  key={id}
+                                  className="flex justify-between text-gray-300 text-sm"
+                                  variants={itemAnimation}
+                                  initial="hidden"
+                                  animate="visible"
+                                >
+                                  <span>{spec.name}</span>
+                                  <span>PHP {spec.price.toFixed(2)}</span>
+                                </motion.div>
+                              )
+                            );
+                          })}
+                          <div className="border-t border-gray-600 pt-3 mt-3">
+                            <div className="flex justify-between text-white font-semibold text-base">
+                              <span>Total</span>
+                              <span>PHP {totalPrice.toFixed(2)}</span>
+                            </div>
                           </div>
                         </div>
+                      ) : (
+                        <p className="text-gray-400 text-sm">Select services to see summary</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-gray-300 mb-2 text-sm font-semibold">Date</label>
+                        <input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            setSelectedDate(e.target.value)
+                          }
+                          min={new Date().toISOString().split("T")[0]}
+                          className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
+                          required
+                          title="Select appointment date"
+                        />
                       </div>
-                    ) : (
-                      <p className="text-gray-400 text-sm">Select services to see summary</p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-gray-300 mb-2 text-sm font-semibold">Date</label>
-                      <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setSelectedDate(e.target.value)
-                        }
-                        min={new Date().toISOString().split("T")[0]}
-                        className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
-                        required
-                        title="Select appointment date"
-                      />
+                      <div>
+                        <label className="block text-gray-300 mb-2 text-sm font-semibold">Time (PHT)</label>
+                        <select
+                          value={selectedTime}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                            setSelectedTime(e.target.value)
+                          }
+                          className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
+                          required
+                          title="Select appointment time"
+                        >
+                          <option value="">Select time</option>
+                          {generateTimeOptions().map((time: string) => (
+                            <option key={time} value={time}>
+                              {formatTimeTo12Hour(time)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-gray-300 mb-2 text-sm font-semibold">Time (PHT)</label>
-                      <select
-                        value={selectedTime}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                          setSelectedTime(e.target.value)
-                        }
-                        className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
-                        required
-                        title="Select appointment time"
+                    {bookingError && (
+                      <motion.p
+                        className="text-red-500 text-sm"
+                        initial="hidden"
+                        animate="visible"
+                        variants={itemAnimation}
                       >
-                        <option value="">Select time</option>
-                        {generateTimeOptions().map((time: string) => (
-                          <option key={time} value={time}>
-                            {formatTimeTo12Hour(time)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                        {bookingError}
+                      </motion.p>
+                    )}
+                    <p className="text-gray-400 text-sm">
+                      Note: Bookings are non-refundable and cannot be changed once confirmed.
+                    </p>
                   </div>
-                  {bookingError && (
-                    <motion.p
-                      className="text-red-500 text-sm"
-                      initial="hidden"
-                      animate="visible"
-                      variants={itemAnimation}
-                    >
-                      {bookingError}
-                    </motion.p>
-                  )}
-                  <p className="text-gray-400 text-sm">
-                    Note: Bookings are non-refundable and cannot be changed once confirmed.
-                  </p>
-                  <div className="flex justify-end gap-3">
+                  <div className="flex justify-end gap-3 pt-4 border-t border-gray-700">
                     <button
                       onClick={() => {
                         setIsBookingModalOpen(false);
@@ -1293,18 +1309,22 @@ const ServiceDetailsContent: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-gray-300 mb-2 text-sm font-semibold">Rating Label</label>
-                  <select
-                    value={ratingLabel}
-                    onChange={(e) => setRatingLabel(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-gray-600 text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400 text-sm"
-                  >
-                    <option value="">Select rating label</option>
+                  <div className="flex flex-wrap gap-2">
                     {RATING_LABEL_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setRatingLabel(option.value)}
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          ratingLabel === option.value
+                            ? "bg-indigo-600 text-white"
+                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        } transition-colors`}
+                      >
                         {option.label}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               </div>
               <div className="mb-4">
