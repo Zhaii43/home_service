@@ -504,7 +504,6 @@ const ServiceDetailsContent: React.FC = () => {
       return;
     }
 
-    // Ensure time is in 24-hour format (HH:MM)
     const timeIn24Hour = selectedTime.includes("AM") || selectedTime.includes("PM")
       ? convertTo24Hour(selectedTime)
       : selectedTime;
@@ -519,8 +518,6 @@ const ServiceDetailsContent: React.FC = () => {
       latitude: position[0],
       longitude: position[1],
     };
-
-    console.log("Booking payload:", payload); // Debug log
 
     if (!payload.service || payload.service <= 0) {
       setBookingError("Invalid service ID in payload.");
@@ -569,7 +566,6 @@ const ServiceDetailsContent: React.FC = () => {
           status: error.response?.status,
           data: errorData,
           message: error.message,
-          headers: error.response?.headers,
         });
 
         if (!error.response) {
@@ -579,12 +575,14 @@ const ServiceDetailsContent: React.FC = () => {
             errorData &&
             typeof errorData === "object" &&
             "non_field_errors" in errorData &&
-            Array.isArray((errorData as { non_field_errors?: string[] }).non_field_errors);
+            Array.isArray((errorData as { non_field_errors?: string[] }).non_field_errors) &&
+            (errorData as { non_field_errors?: string[] }).non_field_errors?.includes(
+              "The fields service, booking_date, booking_time must make a unique set."
+            );
 
           if (hasNonFieldErrors) {
             setBookingError(
-              (errorData as { non_field_errors?: string[] }).non_field_errors?.join(" ") ||
-              "Invalid booking details. Please check your input."
+              `This time slot (${formatTimeTo12Hour(timeIn24Hour)}) on ${selectedDate} is already booked. Please choose a different time or date.`
             );
           } else {
             setBookingError(
@@ -608,7 +606,7 @@ const ServiceDetailsContent: React.FC = () => {
                 "address" in errorData
                 ? (errorData as { address?: string[] }).address?.join(" ")
                 : undefined) ||
-              "Invalid booking details. Please check your input."
+              "Invalid booking details."
             );
           }
         } else if (error.response.status === 401) {
@@ -617,22 +615,12 @@ const ServiceDetailsContent: React.FC = () => {
           setBookingError("You are not authorized to make this booking.");
         } else if (error.response.status === 404) {
           setBookingError("Service not found.");
-        } else if (error.response.status === 500) {
-          setBookingError(
-            "A server error occurred. Please try again later or contact support if the issue persists."
-          );
         } else {
-          setBookingError(
-            `Unexpected error (Status ${error.response.status}): ${
-              (errorData && typeof errorData === "object" && "detail" in errorData
-                ? (errorData as { detail?: string }).detail
-                : error.message) || "Please try again later."
-            }`
-          );
+          setBookingError("Server error occurred. Please try again later.");
         }
       } else {
         console.error("Unexpected error:", error);
-        setBookingError("An unexpected error occurred. Please try again.");
+        setBookingError("An unexpected error occurred.");
       }
     }
   };
@@ -1096,7 +1084,7 @@ const ServiceDetailsContent: React.FC = () => {
                   </div>
                   {bookingError && (
                     <motion.p
-                      className="text-red-500 text-sm font-semibold bg-red-900/20 p-2 rounded"
+                      className="text-red-500 text-sm"
                       initial="hidden"
                       animate="visible"
                       variants={itemAnimation}
@@ -1223,7 +1211,7 @@ const ServiceDetailsContent: React.FC = () => {
                     </div>
                     {bookingError && (
                       <motion.p
-                        className="text-red-500 text-sm font-semibold bg-red-900/20 p-2 rounded"
+                        className="text-red-500 text-sm"
                         initial="hidden"
                         animate="visible"
                         variants={itemAnimation}
