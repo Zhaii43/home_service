@@ -44,7 +44,7 @@ function ServicesContent() {
   const fetchServices = async () => {
     try {
       const response = await axios.get("https://backend-r9v8.onrender.com/api/service-images");
-      setServices(response.data); // Use response.data, not response.data.data
+      setServices(response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Failed to fetch services:", {
@@ -93,9 +93,6 @@ function ServicesContent() {
     }
   };
 
-  // Get unique categories (limit to 6 if you want)
-  const uniqueCategories = [...new Set(services.map((service) => service.category))].slice(0, 6);
-
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
       <Header />
@@ -122,20 +119,22 @@ function ServicesContent() {
                 All Services
               </button>
             </li>
-            {uniqueCategories.map((cat) => (
-              <li key={cat}>
-                <button
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`w-full text-left px-4 py-3 rounded-lg text-gray-200 font-medium transition-all duration-200 ${
-                    category === cat
-                      ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white"
-                      : "hover:bg-gray-700 hover:text-purple-400"
-                  }`}
-                >
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-              </li>
-            ))}
+            {[...new Set(services.map((service) => service.category))].map(
+              (cat) => (
+                <li key={cat}>
+                  <button
+                    onClick={() => handleCategoryChange(cat)}
+                    className={`w-full text-left px-4 py-3 rounded-lg text-gray-200 font-medium transition-all duration-200 ${
+                      category === cat
+                        ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white"
+                        : "hover:bg-gray-700 hover:text-purple-400"
+                    }`}
+                  >
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </button>
+                </li>
+              )
+            )}
           </ul>
         </motion.aside>
 
@@ -150,9 +149,9 @@ function ServicesContent() {
             <input
               type="text"
               placeholder="Search for services..."
+              className="w-full px-5 py-3 bg-gray-800/50 border border-gray-700 rounded-l-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-5 py-3 bg-gray-800/50 border border-gray-700 rounded-l-lg text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
             />
             <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-r-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200">
               Search
