@@ -60,21 +60,21 @@ export default function Home() {
       name: "Carl Christian",
       text: "\"The plumbing service was fantastic! Quick, professional, and affordable.\"",
       rating: 5,
-      avatar: "/images/carl.jpg",
+      avatar: "/images/1.jpg",
     },
     {
       id: 2,
       name: "Ralph Villarojo",
       text: "\"I had an amazing experience with the cleaning service. Highly recommend!\"",
       rating: 4,
-      avatar: "/images/ralph.jpg",
+      avatar: "/images/2.jpg",
     },
     {
       id: 3,
       name: "Brian Labago",
       text: "\"The renovation team transformed my home beautifully. Great work!\"",
       rating: 5,
-      avatar: "/images/brian.jpg",
+      avatar: "/images/3.jpg",
     },
   ];
 
