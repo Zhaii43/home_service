@@ -104,12 +104,9 @@ export default function Home() {
     (service) => category === "all" || service.category === category
   );
 
-  // Limit to exactly 6 categories, padding with null if needed
+  // Get all unique categories, filtered by search query
   const uniqueCategories = [...new Set(services.map((service) => service.category))]
-    .slice(0, 6) // Limit to 6 categories before filtering
-    .filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()))
-    .concat(Array(6).fill(null)) // Pad with null to ensure 6 slots
-    .slice(0, 6); // Ensure exactly 6 items
+    .filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const featuredServices = services
     .filter((service) => service.rating && service.rating >= 4)
@@ -251,30 +248,19 @@ export default function Home() {
               All Categories
             </button>
 
-            {uniqueCategories.map((cat, index) => (
-              cat ? (
-                <button
-                  key={cat}
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                    category === cat
-                      ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg"
-                      : "text-gray-200 hover:bg-gray-700/70 hover:text-white"
-                  }`}
-                >
-                  <Users className="w-5 h-5" />
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-              ) : (
-                <button
-                  key={`empty-${index}`}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500 cursor-not-allowed opacity-50"
-                  disabled
-                >
-                  <Users className="w-5 h-5" />
-                  No Category
-                </button>
-              )
+            {uniqueCategories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => handleCategoryChange(cat)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  category === cat
+                    ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg"
+                    : "text-gray-200 hover:bg-gray-700/70 hover:text-white"
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
             ))}
           </nav>
         </aside>
