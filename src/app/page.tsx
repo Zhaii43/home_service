@@ -104,9 +104,12 @@ export default function Home() {
     (service) => category === "all" || service.category === category
   );
 
-const uniqueCategories = [...new Set(services.map((service) => service.category))]
-  .filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()))
-  .slice(0, 6);
+  // Limit to exactly 6 categories, padding with null if needed
+  const uniqueCategories = [...new Set(services.map((service) => service.category))]
+    .slice(0, 6) // Limit to 6 categories before filtering
+    .filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()))
+    .concat(Array(6).fill(null)) // Pad with null to ensure 6 slots
+    .slice(0, 6); // Ensure exactly 6 items
 
   const featuredServices = services
     .filter((service) => service.rating && service.rating >= 4)
@@ -248,19 +251,30 @@ const uniqueCategories = [...new Set(services.map((service) => service.category)
               All Categories
             </button>
 
-            {uniqueCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                  category === cat
-                    ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg"
-                    : "text-gray-200 hover:bg-gray-700/70 hover:text-white"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
+            {uniqueCategories.map((cat, index) => (
+              cat ? (
+                <button
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    category === cat
+                      ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg"
+                      : "text-gray-200 hover:bg-gray-700/70 hover:text-white"
+                  }`}
+                >
+                  <Users className="w-5 h-5" />
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </button>
+              ) : (
+                <button
+                  key={`empty-${index}`}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500 cursor-not-allowed opacity-50"
+                  disabled
+                >
+                  <Users className="w-5 h-5" />
+                  No Category
+                </button>
+              )
             ))}
           </nav>
         </aside>
@@ -274,22 +288,28 @@ const uniqueCategories = [...new Set(services.map((service) => service.category)
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {(() => {
-              // Group services by category and limit to 5 per category
-              const groupedServices = filteredServices.reduce((acc, service) => {
-                if (!acc[service.category]) {
-                  acc[service.category] = [];
-                }
-                acc[service.category].push(service);
-                return acc;
-              }, {} as { [key: string]: ServiceType[] });
+              let servicesToDisplay: ServiceType[] = [];
 
-              // Limit to 5 services per category
-              const limitedServices = Object.values(groupedServices)
-                .flatMap((services) => services.slice(0, 5))
-                .sort((a, b) => a.category.localeCompare(b.category));
+              if (category === "all") {
+                // For "All Categories", limit to 6 services total
+                servicesToDisplay = filteredServices.slice(0, 6);
+              } else {
+                // For specific categories, group by category and limit to 5 per category
+                const groupedServices = filteredServices.reduce((acc, service) => {
+                  if (!acc[service.category]) {
+                    acc[service.category] = [];
+                  }
+                  acc[service.category].push(service);
+                  return acc;
+                }, {} as { [key: string]: ServiceType[] });
 
-              return limitedServices.length > 0 ? (
-                limitedServices.map((service) => (
+                servicesToDisplay = Object.values(groupedServices)
+                  .flatMap((services) => services.slice(0, 5))
+                  .sort((a, b) => a.category.localeCompare(b.category));
+              }
+
+              return servicesToDisplay.length > 0 ? (
+                servicesToDisplay.map((service) => (
                   <motion.div
                     key={service.id}
                     className="bg-gradient-to-br from-gray-800 to-gray-85 border border-gray-700/30 rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-500 ease-out"
