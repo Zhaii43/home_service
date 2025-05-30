@@ -119,9 +119,23 @@ function MyBookingContent() {
     const now = new Date();
     const todayPHT = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
     const bookingDateTime = new Date(`${bookingDate}T${bookingTime}:00+08:00`);
-    if (bookingDateTime <= todayPHT) {
+
+    // Check if the booking date is in the past
+    const bookingDateOnly = new Date(bookingDate);
+    bookingDateOnly.setHours(0, 0, 0, 0);
+    todayPHT.setHours(0, 0, 0, 0);
+    if (bookingDateOnly < todayPHT) {
       return false;
     }
+
+    // If the booking is today, check if the time has passed
+    if (bookingDateOnly.getTime() === todayPHT.getTime()) {
+      if (bookingDateTime <= now) {
+        return false;
+      }
+    }
+
+    // Check if the time is within the allowed range (9:00 AM - 7:00 PM)
     return isWithinAllowedTime(bookingTime);
   };
 
@@ -223,7 +237,7 @@ function MyBookingContent() {
         console.error("Failed to fetch work specifications:", error);
         setError("Failed to fetch work specifications.");
       } else {
-        console.error("Unexpected error fetching work specifications:", error);
+        console.error("Unexpected7 error fetching work specifications:", error);
         setError("An unexpected error occurred.");
       }
     }
@@ -234,6 +248,26 @@ function MyBookingContent() {
       setError("This booking cannot be edited.");
       return;
     }
+
+    // Check if the booking date is in the past
+    const now = new Date();
+    const todayPHT = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+    const bookingDate = new Date(booking.booking_date);
+    bookingDate.setHours(0, 0, 0, 0);
+    todayPHT.setHours(0, 0, 0, 0);
+
+    if (bookingDate < todayPHT) {
+      setError("Cannot edit bookings for past dates.");
+      return;
+    }
+
+    // If the booking is today, check if the time has passed
+    const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}:00+08:00`);
+    if (bookingDate.getTime() === todayPHT.getTime() && bookingDateTime <= now) {
+      setError("Cannot edit bookings for past times on the current date.");
+      return;
+    }
+
     setSelectedBooking(booking);
     setNewDate(booking.booking_date);
     setNewTime(booking.booking_time);
@@ -254,7 +288,7 @@ function MyBookingContent() {
     }
 
     if (!isValidRescheduleTime(newDate, newTime)) {
-      setError("Rescheduling is only allowed between 9:00 AM and 7:00 PM.");
+      setError("Rescheduling is only allowed between 9:00 AM and 7:00 PM for future or current dates.");
       return;
     }
 
@@ -674,7 +708,7 @@ function MyBookingContent() {
                             ) : (
                               <div className="flex-1" />
                             )}
-                            {booking.is_editable && booking.status === "scheduled" ? (
+                            {booking.is_editable && booking.status === "scheduled" && isValidRescheduleTime(booking.booking_date, booking.booking_time) ? (
                               <button
                                 onClick={() => handleEditBooking(booking)}
                                 className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 hover:scale-105 transition-all duration-300"
@@ -684,7 +718,14 @@ function MyBookingContent() {
                                 Edit
                               </button>
                             ) : (
-                              <div className="flex-1" />
+                              <button
+                                disabled
+                                className="flex-1 px-4 py-2 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
+                                aria-label={`Edit booking for ${booking.service_detail?.title} (disabled)`}
+                              >
+                                <PencilIcon className="h-5 w-5 inline mr-2" />
+                                Edit
+                              </button>
                             )}
                           </div>
                         </motion.div>
