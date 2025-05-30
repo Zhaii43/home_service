@@ -29,6 +29,8 @@ function ServicesContent() {
 
   const [services, setServices] = useState<ServiceType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const servicesPerPage = 6;
 
   const cardAnimation = {
     hidden: { opacity: 0, y: 20 },
@@ -62,6 +64,7 @@ function ServicesContent() {
 
   const handleCategoryChange = (selectedCategory: string) => {
     router.push(`/services?category=${selectedCategory}`);
+    setCurrentPage(1); // Reset to first page when changing category
   };
 
   const filteredServices = services
@@ -70,6 +73,24 @@ function ServicesContent() {
       service.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredServices.length / servicesPerPage);
+  const startIndex = (currentPage - 1) * servicesPerPage;
+  const endIndex = startIndex + servicesPerPage;
+  const currentServices = filteredServices.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 font-sans">
       <Header />
@@ -77,7 +98,7 @@ function ServicesContent() {
       <main className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-10 px-4 sm:px-6 lg:px-8 py-16">
         {/* Categories */}
         <motion.aside
-          className="lg:w-1/4 bg-gray-800/50 border border-gray-700 p-6 rounded-xl shadow-lg"
+          className="lg:w-1/4 bg-gray-800/50 border border-gray-700 p-6 rounded-xl shadow-lg max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-gray-800"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -145,8 +166,8 @@ function ServicesContent() {
           </motion.h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredServices.length > 0 ? (
-              filteredServices.map((service) => (
+            {currentServices.length > 0 ? (
+              currentServices.map((service) => (
                 <motion.div
                   key={service.id}
                   className="bg-gray-800/50 border border-gray-700 rounded-xl shadow-lg overflow-hidden flex flex-col h-full hover:shadow-[0_4px_20px_rgba(128,0,255,0.3)] transition-all duration-300"
@@ -188,10 +209,41 @@ function ServicesContent() {
               </div>
             )}
           </div>
+
+          {/* Pagination Buttons */}
+          {filteredServices.length > servicesPerPage && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  currentPage === 1
+                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 hover:scale-105"
+                }`}
+              >
+                Previous
+              </button>
+              <span className="text-gray-200 font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  currentPage === totalPages
+                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 hover:scale-105"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
       </main>
 
-    <Footer />
+      <Footer />
     </div>
   );
 }
