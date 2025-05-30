@@ -157,12 +157,11 @@ function ServicesContent() {
                   <div className="relative w-full h-48 flex-shrink-0 group">
                     {service.images.length > 0 ? (
                       <Image
-                        src={`https://backend-r9v8.onrender.com${service.images[0].image}`}
+                        src={service.images[0].image}
                         alt={service.title}
                         fill
                         style={{ objectFit: "cover" }}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        priority={true} // Optional: Prioritize loading for above-the-fold images
                       />
                     ) : (
                       <div className="flex items-center justify-center w-full h-full bg-gray-700 text-sm text-gray-400">
@@ -192,7 +191,7 @@ function ServicesContent() {
         </section>
       </main>
 
-      <Footer />
+    <Footer />
     </div>
   );
 }
