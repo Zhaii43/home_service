@@ -106,9 +106,7 @@ const LoginPage: React.FC = () => {
           {/* Image Section */}
           <div className="w-full md:w-1/2 relative">
             <Image
-              src="/images/background
-
-.jpg"
+              src="/images/background.jpg"
               alt="Login Banner"
               width={500}
               height={500}
