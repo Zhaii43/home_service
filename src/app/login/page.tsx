@@ -182,7 +182,7 @@ const LoginPage: React.FC = () => {
                   </button>
                 </p>
                 <p>
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link href="/signup" className="text-purple-400 hover:text-purple-300 transition-colors duration-200">
                     Sign up
                   </Link>
