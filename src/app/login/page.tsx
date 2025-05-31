@@ -15,8 +15,13 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  // New state for password visibility
   const [showPassword, setShowPassword] = useState(false);
+  // States for forgot password modal
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   const router = useRouter();
 
@@ -25,7 +30,11 @@ const LoginPage: React.FC = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  // Toggle password visibility
+  const modalAnimation = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
+  };
+
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
@@ -56,6 +65,30 @@ const LoginPage: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetMessage("");
+    setResetError("");
+    setResetLoading(true);
+
+    try {
+      const response = await axios.post("https://backend-r9v8.onrender.com/api/user/password-reset-request/", {
+        email: resetEmail,
+      });
+
+      setResetMessage(response.data.message);
+      setResetEmail("");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setResetError(error.response?.data?.error || "Something went wrong");
+      } else {
+        setResetError("An unexpected error occurred");
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -147,15 +180,102 @@ const LoginPage: React.FC = () => {
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
-              <p className="text-center text-sm text-gray-400">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="text-purple-400 hover:text-purple-300 transition-colors duration-200">
-                  Sign up
-                </Link>
-              </p>
+              <div className="text-center text-sm text-gray-400 space-y-2">
+                <p>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-purple-400 hover:text-purple-300 transition-colors duration-200"
+                  >
+                    Forgot Password?
+                  </button>
+                </p>
+                <p>
+                  Don&apos;t have an account?{" "}
+                  <Link href="/signup" className="text-purple-400 hover:text-purple-300 transition-colors duration-200">
+                    Sign up
+                  </Link>
+                </p>
+              </div>
             </form>
           </div>
         </motion.div>
+
+        {/* Forgot Password Modal */}
+        {showForgotPassword && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <motion.div
+              className="bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md"
+              variants={modalAnimation}
+              initial="hidden"
+              animate="visible"
+            >
+              <h3 className="text-2xl font-bold text-center mb-4 text-gray-200">
+                Reset Password
+              </h3>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="reset-email"
+                    className="block text-sm font-medium text-gray-300"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="reset-email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    className="mt-1 block w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                {resetMessage && (
+                  <motion.div
+                    className="text-green-400 text-center bg-green-900/20 border border-green-700 rounded-lg py-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {resetMessage}
+                  </motion.div>
+                )}
+                {resetError && (
+                  <motion.div
+                    className="text-red-400 text-center bg-red-900/20 border border-red-700 rounded-lg py-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {resetError}
+                  </motion.div>
+                )}
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetEmail("");
+                      setResetMessage("");
+                      setResetError("");
+                    }}
+                    className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {resetLoading ? "Sending..." : "Send Reset Link"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
       </main>
 
       <Footer />
